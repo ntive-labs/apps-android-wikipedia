@@ -10,241 +10,247 @@ marked as not applicable).
 
 **Size** = files changed, lines added/removed.
 
+**Results** = triage verdict from per-commit AI analysis (2026-06-09). `Excluded:` rows are checked off
+and will not be synced — the reason is noted (mechanical change, Android-only plumbing, or the
+no-backfill rule: changes to a pre-window Android feature that doesn't exist on iOS). `Candidate:`
+rows remain unchecked and describe the likely iOS change; each still needs per-commit planning and
+execution. Triage was conservative: uncertain commits were kept as candidates.
+
 ## Commit checklist
 
-| Done | Commit | Date | Author | Size | Summary |
-|------|--------|------|--------|------|---------|
-| [ ] | `af457ff7ae` | 2026-02-20 | Dmitry Brant | 55f, +2413/−292 | Hybrid search (feature branch) (#6221) |
-| [ ] | `eca7eac6e6` | 2026-02-20 | Cooltey Feng | 3f, +39/−15 | Fix: handle dismiss/undo card behavior correctly for WikiGames Card (#6322) |
-| [ ] | `ab00f5a8dd` | 2026-02-20 | William Rai | 1f, +3/−1 | Fixes an issue where the Explore feed card visibility didn’t update when toggling languages from the horizontal list in ConfigureActivity (#6338) |
-| [ ] | `6c6ce5193c` | 2026-02-23 | translatewiki.net | 25f, +50/−43 | Localisation updates from https://translatewiki.net. (#6339) |
-| [ ] | `517351d4cd` | 2026-02-24 | Dmitry Brant | 14f, +289/−46 | Hybrid search: instrumentation. (#6337) |
-| [ ] | `e17bbd4e49` | 2026-02-24 | Cooltey Feng | 1f, +10/−1 | Fix: Handle insufficient events for WikiGames and avoid getting stuck in the error page (#6342) |
-| [ ] | `cab384d412` | 2026-02-24 | William Rai | 1f, +1/−1 | Bump versionCode. (#6343) |
-| [ ] | `7bcbde2866` | 2026-02-25 | William Rai | 1f, +7/−0 | Update testTranslateWikiQQ to fail test if qq contains extra strings (#6344) |
-| [ ] | `76534641a9` | 2026-02-25 | dependabot[bot] | 1f, +1/−1 | Bump coilCompose from 3.3.0 to 3.4.0 (#6345) |
-| [ ] | `3f5acb1ee9` | 2026-02-26 | translatewiki.net | 6f, +108/−2 | Localisation updates from https://translatewiki.net. (#6349) |
-| [ ] | `9512546822` | 2026-02-26 | Cooltey Feng | 1f, +24/−5 | Fix: show the bottom bar even if no results in title-only screen in Semantic search (#6347) |
-| [ ] | `4778ade23b` | 2026-02-26 | Cooltey Feng | 3f, +10/−1 | Show up keyboard when showing no results in the title-only screen for Semantic search (#6350) |
-| [ ] | `de2684bce4` | 2026-03-02 | translatewiki.net | 6f, +159/−24 | Localisation updates from https://translatewiki.net. (#6354) |
-| [ ] | `b7745030f3` | 2026-03-02 | Cooltey Feng | 1f, +1/−1 | Hybrid Search: update learn_button to learn_more (#6352) |
-| [ ] | `00dbe762e6` | 2026-03-02 | dependabot[bot] | 1f, +1/−1 | Bump androidx.compose:compose-bom from 2026.02.00 to 2026.02.01 (#6356) |
-| [ ] | `fe1486bbed` | 2026-03-03 | Dmitry Brant | 1f, +4/−1 | Fix subtle Game bug when saving progress on last question. (#6360) |
-| [ ] | `4824d3a9f7` | 2026-03-03 | Dmitry Brant | 1f, +8/−12 | Adjust Game algorithm to account for days with insufficient events. (#6358) |
-| [ ] | `0e5261db2e` | 2026-03-03 | William Rai | 1f, +1/−1 | Bump versionCode. (#6357) |
-| [ ] | `837d6a0650` | 2026-03-03 | dependabot[bot] | 1f, +1/−1 | Bump com.android.application from 9.0.1 to 9.1.0 (#6361) |
-| [ ] | `13503d1fa2` | 2026-03-03 | dependabot[bot] | 1f, +1/−1 | Bump com.github.skydoves:balloon from 1.7.3 to 1.7.4 (#6362) |
-| [ ] | `2e336358d3` | 2026-03-03 | Dmitry Brant | 1f, +1/−1 | Update image dimming coefficient to match mobile web. (#6363) |
-| [ ] | `148284e898` | 2026-03-04 | Dmitry Brant | 6f, +26/−27 | Instrumentation: introduce default actionSource parameter. (#6366) |
-| [ ] | `29651df144` | 2026-03-04 | dependabot[bot] | 3f, +2/−2 | Bump gradle-wrapper from 9.3.1 to 9.4.0 (#6365) |
-| [ ] | `1bb599ca9f` | 2026-03-05 | translatewiki.net | 9f, +236/−15 | Localisation updates from https://translatewiki.net. (#6368) |
-| [ ] | `57b418df7d` | 2026-03-06 | Dmitry Brant | 18f, +39/−20 | Upgrade ktlint to 1.8.0. (#6371) |
-| [ ] | `26e53d77c0` | 2026-03-06 | dependabot[bot] | 3f, +3/−3 | Bump actions/upload-artifact from 6 to 7 (#6355) |
-| [ ] | `5f53119c03` | 2026-03-09 | translatewiki.net | 6f, +31/−8 | Localisation updates from https://translatewiki.net. (#6375) |
-| [ ] | `2d908c3384` | 2026-03-09 | Dmitry Brant | 15f, +152/−32 | Instrumentation: underpinnings for sending events to logging intake. (#6370) |
-| [ ] | `6240fa0d02` | 2026-03-09 | Dmitry Brant | 6f, +49/−28 | Semantic search: update API, and enable for FR. (#6373) |
-| [ ] | `6d0b3e0c4e` | 2026-03-09 | Dmitry Brant | 1f, +10/−10 | Hybrid search: French strings. (#6376) |
-| [ ] | `80c5898f4e` | 2026-03-09 | Cooltey Feng | 1f, +1/−1 | Bump versionCode. (#6378) |
-| [ ] | `763158c976` | 2026-03-11 | Dmitry Brant | 1f, +8/−1 | Don't log HTTP errors for 320px thumbnail requests. (#6383) |
-| [ ] | `e95b52efc6` | 2026-03-11 | Cooltey Feng | 2f, +15/−3 | HybridSearch: French sample queries update (#6382) |
-| [ ] | `6c43d3fe3c` | 2026-03-11 | Dmitry Brant | 2f, +12/−4 | Apply User-agent header to MediaPlayer instances. (#6386) |
-| [ ] | `8b7b08008f` | 2026-03-11 | Dmitry Brant | 2f, +2/−2 | When matching system Dark theme, default to Dark theme instead of Black. (#6384) |
-| [ ] | `bf9aa2a5f7` | 2026-03-11 | Cooltey Feng | 1f, +1/−1 | Bump versionCode. (#6385) |
-| [ ] | `232b9d4af5` | 2026-03-12 | dependabot[bot] | 1f, +1/−1 | Bump androidx.activity:activity-compose from 1.12.4 to 1.13.0 (#6390) |
-| [ ] | `d535d2d56b` | 2026-03-12 | translatewiki.net | 7f, +75/−16 | Localisation updates from https://translatewiki.net. (#6388) |
-| [ ] | `518603c85c` | 2026-03-12 | dependabot[bot] | 1f, +1/−1 | Bump androidx.paging:paging-runtime-ktx from 3.4.1 to 3.4.2 (#6389) |
-| [ ] | `64c8c19892` | 2026-03-12 | Dmitry Brant | 6f, +4/−42 | No longer explicitly set user preferences for Push notifications. (#6394) |
-| [ ] | `1000bc2690` | 2026-03-12 | dependabot[bot] | 1f, +1/−1 | Bump androidx.paging:paging-compose from 3.4.1 to 3.4.2 (#6393) |
-| [ ] | `19f2e7f198` | 2026-03-13 | dependabot[bot] | 1f, +1/−1 | Bump androidx.core:core-ktx from 1.17.0 to 1.18.0 (#6392) |
-| [ ] | `15b6c60124` | 2026-03-13 | dependabot[bot] | 1f, +1/−1 | Bump com.github.skydoves:balloon from 1.7.4 to 1.7.5 (#6380) |
-| [ ] | `3270449349` | 2026-03-13 | dependabot[bot] | 1f, +1/−1 | Bump androidx.compose:compose-bom from 2026.02.01 to 2026.03.00 (#6391) |
-| [ ] | `97ff25cb3d` | 2026-03-16 | translatewiki.net | 3f, +13/−7 | Localisation updates from https://translatewiki.net. (#6395) |
-| [ ] | `1765bf32f9` | 2026-03-16 | VeryFat123 | 6f, +7/−16 | No longer use notwikis parameter in notifications API calls. (#6381) |
-| [ ] | `a28cfec3f5` | 2026-03-17 | dependabot[bot] | 1f, +1/−1 | Bump ncipollo/release-action from 1.20.0 to 1.21.0 (#6397) |
-| [ ] | `fdb9d5722b` | 2026-03-17 | dependabot[bot] | 1f, +1/−1 | Bump kotlinStdlibJdk8 from 2.3.10 to 2.3.20 (#6399) |
-| [ ] | `c70a46498a` | 2026-03-17 | William Rai | 55f, +2409/−710 | [Feature Branch] WikiGames Update (#6325) |
-| [ ] | `fc23ea01ae` | 2026-03-17 | Dmitry Brant | 2f, +38/−33 | Fix potential crash from re-adding events to queue. (#6403) |
-| [ ] | `ea4fc42598` | 2026-03-17 | Cooltey Feng | 1f, +1/−1 | Bump versionCode. (#6404) |
-| [ ] | `ffd1c5d115` | 2026-03-17 | Cooltey Feng | 3f, +1/−9 | WikiGames: remove "Learn more" CTA from the snackbar after close (#6402) |
-| [ ] | `ca1be9f0af` | 2026-03-17 | William Rai | 5f, +24/−6 | Wikigames design review fixes (#6400) |
-| [ ] | `53dfbc934d` | 2026-03-18 | Cooltey Feng | 1f, +14/−12 | WikiGames: do not show image placeholder when the URL is empty (#6406) |
-| [ ] | `ed8a5dde85` | 2026-03-18 | Dmitry Brant | 3f, +4/−77 | Semantic search: enable for EN and PT, and rip out for EL. (#6408) |
-| [ ] | `f28c0fe37d` | 2026-03-18 | Dmitry Brant | 15f, +5/−246 | Rip out Year-in-Review reading list a/b test. (#6405) |
-| [ ] | `b52ce5b270` | 2026-03-18 | Dmitry Brant | 1f, +1/−1 | Fix rate-limiting issue with Random articles in the Feed. (#6410) |
-| [ ] | `a91e456007` | 2026-03-18 | Dmitry Brant | 16f, +240/−93 | Instrumentation for authentication workflows. (#6369) |
-| [ ] | `9ddfb7f727` | 2026-03-18 | Dmitry Brant | 1f, +3/−10 | Semantic search: fix/simplify progress bar logic. (#6409) |
-| [ ] | `63ae0be906` | 2026-03-18 | William Rai | 1f, +1/−1 | - removes the extra padding between the Login button (#6413) |
-| [ ] | `73b3b6408a` | 2026-03-19 | translatewiki.net | 52f, +228/−283 | Localisation updates from https://translatewiki.net. (#6415) |
-| [ ] | `5be171920e` | 2026-03-19 | Dmitry Brant | 3f, +26/−26 | Semantic search: no longer stuff result lists into actionContext. (#6419) |
-| [ ] | `c8c32f212a` | 2026-03-19 | Cooltey Feng | 1f, +1/−1 | Bump versionCode. (#6423) |
-| [ ] | `cc4b73a619` | 2026-03-20 | dependabot[bot] | 2f, +2/−2 | Bump gradle-wrapper from 9.4.0 to 9.4.1 (#6418) |
-| [ ] | `7a446fbc0e` | 2026-03-20 | Dmitry Brant | 3f, +26/−7 | Semantic search: Portuguese translation update. (#6425) |
-| [ ] | `df869fb02e` | 2026-03-20 | Dmitry Brant | 2f, +2/−2 | Event logging: display Toast upon errors in Alpha, not just Dev. (#6426) |
-| [ ] | `5eeffeb144` | 2026-03-20 | Dmitry Brant | 3f, +22/−8 | TestKitchen: allow Instrument to set its own MediaWiki dbname. (#6424) |
-| [ ] | `8b8b7c2f87` | 2026-03-20 | Dmitry Brant | 7f, +131/−40 | Hybrid search: reintroduce Greek. (#6427) |
-| [ ] | `7566c64410` | 2026-03-20 | Dmitry Brant | 1f, +1/−1 | Bump versionCode. (#6429) |
-| [ ] | `6e8661bb6a` | 2026-03-20 | William Rai | 1f, +0/−2 | - espresso fixes (#6417) |
-| [ ] | `0935bf2406` | 2026-03-23 | translatewiki.net | 10f, +1912/−51 | Localisation updates from https://translatewiki.net. (#6431) |
-| [ ] | `051cb9e54c` | 2026-03-23 | Cooltey Feng | 1f, +25/−23 | Fix: possible crash when refresh the WikiGames cards on the Explore Feed (#6430) |
-| [ ] | `64d7e74608` | 2026-03-23 | Dmitry Brant | 1f, +14/−3 | Add convenience to BottomSheetDialog to start in expanded state. (#6433) |
-| [ ] | `757b433505` | 2026-03-24 | Dmitry Brant | 2f, +1/−2 | Update ktlint rules to add unused-imports rule. (#6437) |
-| [ ] | `b50237e6a0` | 2026-03-24 | Dmitry Brant | 1f, +1/−0 | Fix missing callback for HCaptcha instrumentation. (#6438) |
-| [ ] | `7c8259f06a` | 2026-03-24 | Dmitry Brant | 1f, +2/−4 | Semantic search instrumentation: send search-id for thumbs up/down. (#6441) |
-| [ ] | `ce3b24a1e3` | 2026-03-24 | William Rai | 9f, +61/−15 | Instrumentation for games hub (#6434) |
-| [ ] | `f4a1922bcc` | 2026-03-25 | dependabot[bot] | 1f, +1/−1 | Bump androidx.work:work-runtime-ktx from 2.11.1 to 2.11.2 (#6445) |
-| [ ] | `8075f8ca3b` | 2026-03-25 | Dmitry Brant | 8f, +119/−95 | Hybrid search: expanded instrumentation. (#6448) |
-| [ ] | `bb95b4dea8` | 2026-03-26 | translatewiki.net | 8f, +39/−8 | Localisation updates from https://translatewiki.net. (#6450) |
-| [ ] | `cb5af17ea7` | 2026-03-26 | Dmitry Brant | 1f, +1/−1 | Hybrid search: Update verbiage string. (#6451) |
-| [ ] | `2d44e869cb` | 2026-03-26 | Dmitry Brant | 1f, +1/−1 | Bump versionCode. (#6454) |
-| [ ] | `2fa7fd5f52` | 2026-03-26 | dependabot[bot] | 1f, +1/−1 | Bump androidx.compose:compose-bom from 2026.03.00 to 2026.03.01 (#6452) |
-| [ ] | `0f8a7f279f` | 2026-03-26 | William Rai | 2f, +132/−0 | - adds reading challenge widgets (#6455) |
-| [ ] | `3c297e3a52` | 2026-03-27 | dependabot[bot] | 1f, +1/−1 | Bump androidx.browser:browser from 1.9.0 to 1.10.0 (#6453) |
-| [ ] | `d2a601641b` | 2026-03-27 | dependabot[bot] | 1f, +1/−1 | Bump org.maplibre.gl:android-sdk from 12.2.2 to 12.3.0 (#6189) |
-| [ ] | `b2d724fbd1` | 2026-03-27 | Dmitry Brant | 1f, +1/−0 | Don't restart SearchActivity on configuration changes. (#6457) |
-| [ ] | `0d33204efd` | 2026-03-30 | translatewiki.net | 29f, +927/−109 | Localisation updates from https://translatewiki.net. (#6462) |
-| [ ] | `0614bedaba` | 2026-03-30 | William Rai | 1f, +1/−1 | Bump versionCode. (#6464) |
-| [ ] | `c4c6ed86a6` | 2026-03-31 | dependabot[bot] | 1f, +1/−1 | Bump gradle/actions from 5 to 6 (#6463) |
-| [ ] | `3db8ee25d7` | 2026-03-31 | Dmitry Brant | 1f, +3/−0 | Add minimal security policy file. (#6466) |
-| [ ] | `4180257433` | 2026-03-31 | Dmitry Brant | 1f, +3/−3 | Instrumentation: send create_source with success event. (#6465) |
-| [ ] | `36f8e06d60` | 2026-03-31 | Dmitry Brant | 4f, +58/−2 | Allow edge-to-edge for MainActivity, enabling full-bleed compositions. (#6444) |
-| [ ] | `9b934fcafd` | 2026-03-31 | Dmitry Brant | 1f, +3/−3 | Properly limit cross-domain sharing of CentralAuth cookies. (#6469) |
-| [ ] | `45e09e3135` | 2026-04-01 | Dmitry Brant | 3f, +19/−5 | Verify URLs from VIEW intent before opening. (#6471) |
-| [ ] | `6c4c79006f` | 2026-04-01 | Dmitry Brant | 2f, +6/−2 | Limit supported hosts for deeplink scheme. (#6472) |
-| [ ] | `d094f168bf` | 2026-04-01 | Dmitry Brant | 3f, +41/−28 | More complete fix of black status bar behind all ActionModes. (#6473) |
-| [ ] | `6e625872da` | 2026-04-01 | Dmitry Brant | 1f, +1/−7 | No longer set CORS header on responses passed to WebView. (#6470) |
-| [ ] | `b095dea213` | 2026-04-01 | William Rai | 2f, +3/−42 | - override status guard color when action mode is turned on (#6474) |
-| [ ] | `4c722eb9b0` | 2026-04-01 | dependabot[bot] | 1f, +1/−1 | Bump org.maplibre.gl:android-sdk from 13.0.1 to 13.0.2 (#6467) |
-| [ ] | `41c103e677` | 2026-04-02 | translatewiki.net | 15f, +1181/−42 | Localisation updates from https://translatewiki.net. (#6476) |
-| [ ] | `8d884515c2` | 2026-04-03 | Dmitry Brant | 1f, +13/−12 | Improve handling of insets in updated MainActivity. (#6480) |
-| [ ] | `b0d9319859` | 2026-04-06 | translatewiki.net | 12f, +466/−12 | Localisation updates from https://translatewiki.net. (#6482) |
-| [ ] | `f357109cfa` | 2026-04-06 | William Rai | 1f, +1/−1 | Bump versionCode. (#6483) |
-| [ ] | `3e69b4ab40` | 2026-04-08 | Dmitry Brant | 1f, +11/−6 | Fix suggestions to add descriptions when description is empty. (#6487) |
-| [ ] | `04482b47eb` | 2026-04-09 | Dmitry Brant | 8f, +1198/−1165 | Periodic update of languages and static data. (#6489) |
-| [ ] | `cc34d95920` | 2026-04-09 | translatewiki.net | 11f, +192/−52 | Localisation updates from https://translatewiki.net. (#6490) |
-| [ ] | `3368259670` | 2026-04-09 | Dmitry Brant | 1f, +1/−1 | Add "abstract" to list of non-language domains. (#6492) |
-| [ ] | `027a1c2d1e` | 2026-04-09 | William Rai | 2f, +2/−2 | Games hub use correct action name (#6486) |
-| [ ] | `b07d551b23` | 2026-04-09 | William Rai | 1f, +1/−1 | Bump versionCode. (#6493) |
-| [ ] | `2459a1c047` | 2026-04-13 | translatewiki.net | 11f, +423/−38 | Localisation updates from https://translatewiki.net. (#6497) |
-| [ ] | `f60a7ee4fd` | 2026-04-13 | William Rai | 1f, +68/−30 | - fixes an issue on the Game Hub preview screen where larger display and font sizes caused the button text to disappear (#6496) |
-| [ ] | `2c70e69089` | 2026-04-14 | Dmitry Brant | 1f, +22/−1 | Compose HtmlText: introduce default LinkInteractionListener. (#6491) |
-| [ ] | `b74f202c37` | 2026-04-14 | William Rai | 1f, +1/−1 | Bump versionCode. (#6500) |
-| [ ] | `053decca72` | 2026-04-14 | dependabot[bot] | 1f, +1/−1 | Bump com.android.application from 9.1.0 to 9.1.1 (#6498) |
-| [ ] | `5875c905da` | 2026-04-14 | dependabot[bot] | 1f, +1/−1 | Bump org.jetbrains.kotlinx:kotlinx-serialization-json (#6494) |
-| [ ] | `ef040114cd` | 2026-04-16 | translatewiki.net | 12f, +357/−30 | Localisation updates from https://translatewiki.net. (#6505) |
-| [ ] | `6cb6efd4d2` | 2026-04-16 | Cooltey Feng | 1f, +1/−1 | Fix: update successColor in Sepia theme to `Green700` (#6506) |
-| [ ] | `fb8aca0ae8` | 2026-04-17 | dependabot[bot] | 1f, +1/−1 | Bump com.github.skydoves:balloon from 1.7.5 to 1.7.6 (#6507) |
-| [ ] | `c1d6c3ac55` | 2026-04-20 | translatewiki.net | 12f, +68/−10 | Localisation updates from https://translatewiki.net. (#6510) |
-| [ ] | `90f57515c6` | 2026-04-20 | dependabot[bot] | 2f, +29/−38 | Bump com.google.android.gms:play-services-wallet from 19.5.0 to 20.0.0 (#6495) |
-| [ ] | `98c096bae4` | 2026-04-20 | dependabot[bot] | 1f, +3/−3 | Bump addressable from 2.8.7 to 2.9.0 (#6511) |
-| [ ] | `b207fe15c4` | 2026-04-20 | Cooltey Feng | 1f, +1/−1 | Bump versionCode. (#6513) |
-| [ ] | `a742986b9a` | 2026-04-21 | dependabot[bot] | 1f, +1/−1 | Bump org.jsoup:jsoup from 1.22.1 to 1.22.2 (#6512) |
-| [ ] | `e190b1525e` | 2026-04-21 | Dmitry Brant | 2f, +12/−1 | API model underpinnings for Did You Know. (#6514) |
-| [ ] | `06c7f1c5a2` | 2026-04-21 | Dmitry Brant | 5f, +12/−7 | Introduce WikiSite convenience for composable Previews. (#6515) |
-| [ ] | `35e34ec577` | 2026-04-23 | translatewiki.net | 11f, +410/−14 | Localisation updates from https://translatewiki.net. (#6523) |
-| [ ] | `ff44428c1f` | 2026-04-23 | dependabot[bot] | 1f, +1/−1 | Bump androidx.navigation:navigation-compose from 2.9.7 to 2.9.8 (#6520) |
-| [ ] | `438cc0642f` | 2026-04-24 | Dmitry Brant | 3f, +5/−11 | TestKitchen: handle case of streamConfigs being empty, not null. (#6528) |
-| [ ] | `e8a40079f3` | 2026-04-24 | William Rai | 2f, +2/−0 | - string update (#6529) |
-| [ ] | `af927a671a` | 2026-04-24 | dependabot[bot] | 1f, +2/−2 | Bump the kotlin-ksp group with 2 updates (#6524) |
-| [ ] | `99a4268831` | 2026-04-24 | dependabot[bot] | 1f, +1/−1 | Bump com.android.application from 9.1.1 to 9.2.0 (#6517) |
-| [ ] | `6d6f67321a` | 2026-04-24 | dependabot[bot] | 3f, +11/−21 | Bump androidx.compose:compose-bom from 2026.03.01 to 2026.04.01 (#6521) |
-| [ ] | `b1dab4139e` | 2026-04-27 | translatewiki.net | 18f, +389/−10 | Localisation updates from https://translatewiki.net. (#6532) |
-| [ ] | `e5652ed35b` | 2026-04-27 | Dmitry Brant | 1f, +10/−0 | TestKitchen: Flush events periodically, not just when closing activity. (#6535) |
-| [ ] | `52102be0fa` | 2026-04-27 | William Rai | 64f, +4060/−24 | [Feature branch] Reading challenge widget (#6367) |
-| [ ] | `121aead5ce` | 2026-04-27 | Cooltey Feng | 1f, +1/−1 | Bump versionCode. (#6536) |
-| [ ] | `fab8dc862a` | 2026-04-28 | dependabot[bot] | 1f, +1/−1 | Bump androidx.compose.ui:ui-graphics from 1.10.5 to 1.11.0 (#6539) |
-| [ ] | `b378a889fd` | 2026-04-28 | William Rai | 3f, +109/−78 | [Reading Challenge Widget] Widget Size Optimization Using percentage layout (#6541) |
-| [ ] | `356653f6da` | 2026-04-28 | Cooltey Feng | 1f, +1/−1 | Bump versionCode. (#6543) |
-| [ ] | `a26078813e` | 2026-04-30 | translatewiki.net | 10f, +190/−6 | Localisation updates from https://translatewiki.net. (#6548) |
-| [ ] | `36c5590720` | 2026-04-30 | William Rai | 7f, +279/−107 | [Reading Challenge Widget] Fixes missing behavior logic (#6544) |
-| [ ] | `3b438fd1da` | 2026-04-30 | Cooltey Feng | 1f, +38/−29 | [ReadingChallenge] Fix: make content scrollable if the text size is too large (#6547) |
-| [ ] | `09ec2aafff` | 2026-04-30 | Cooltey Feng | 6f, +50/−18 | [ReadingChallenge] Fix: tap on join challenge should always show the prompt (#6545) |
-| [ ] | `4c7555162d` | 2026-04-30 | Cooltey Feng | 1f, +1/−1 | Bump versionCode. (#6550) |
-| [ ] | `54f9b3b3e9` | 2026-05-01 | Dmitry Brant | 158f, +7048/−0 | Add static Topics translations. (#6549) |
-| [ ] | `f37f2a796b` | 2026-05-01 | Dmitry Brant | 1f, +210/−0 | Introduce Topics list for general use. (#6552) |
-| [ ] | `4db3feffe3` | 2026-05-01 | Dmitry Brant | 1f, +81/−0 | Introduce composable for fading-in AsyncImage. (#6551) |
-| [ ] | `7f54a97dd8` | 2026-05-01 | William Rai | 2f, +30/−25 | [Reading Challenge Widget] Fix mascot disappearing (#6554) |
-| [ ] | `45b0254058` | 2026-05-04 | translatewiki.net | 5f, +213/−12 | Localisation updates from https://translatewiki.net. (#6555) |
-| [ ] | `eb5445a922` | 2026-05-04 | Cooltey Feng | 1f, +1/−1 | Bump versionCode. (#6556) |
-| [ ] | `d5ee543659` | 2026-05-05 | dependabot[bot] | 1f, +1/−1 | Bump com.android.application from 9.2.0 to 9.2.1 (#6558) |
-| [ ] | `6e43ec8bd6` | 2026-05-06 | dependabot[bot] | 4f, +14/−23 | Bump gradle-wrapper from 9.4.1 to 9.5.0 (#6540) |
-| [ ] | `cfd2673de8` | 2026-05-06 | dependabot[bot] | 1f, +1/−1 | Bump androidx.paging:paging-runtime-ktx from 3.4.2 to 3.5.0 (#6560) |
-| [ ] | `d296b7efbb` | 2026-05-06 | dependabot[bot] | 1f, +1/−1 | Bump androidx.paging:paging-compose from 3.4.2 to 3.5.0 (#6562) |
-| [ ] | `da70859dd6` | 2026-05-06 | dependabot[bot] | 1f, +1/−1 | Bump androidx.compose:compose-bom from 2026.04.01 to 2026.05.00 (#6561) |
-| [ ] | `81c63185ad` | 2026-05-06 | dependabot[bot] | 1f, +1/−1 | Bump androidx.compose.ui:ui-graphics from 1.11.0 to 1.11.1 (#6563) |
-| [ ] | `198531f0c5` | 2026-05-06 | William Rai | 1f, +1/−0 | - adds instrumentation for ChallengeRemoved state (#6567) |
-| [ ] | `05392ea39b` | 2026-05-06 | William Rai | 1f, +1/−0 | Remove Notification View from Explore Feed when user logs out (#6566) |
-| [ ] | `f730d59705` | 2026-05-06 | Cooltey Feng | 1f, +1/−1 | Bump versionCode. (#6569) |
-| [ ] | `07dd3fd517` | 2026-05-07 | translatewiki.net | 2f, +76/−7 | Localisation updates from https://translatewiki.net. (#6572) |
-| [ ] | `4a3e1357d7` | 2026-05-07 | Cooltey Feng | 2f, +6/−0 | Fix: use legacy zh-classical as the subdomain instead of lzh (#6571) |
-| [ ] | `2bb026367d` | 2026-05-07 | Dmitry Brant | 4f, +11/−11 | Design tweaks to Dot pager indicators. (#6570) |
-| [ ] | `2f95dddb34` | 2026-05-08 | Uwe Martin | 1f, +3/−1 | Using higher contrast text background color when in black or dark mode. (#6531) |
-| [ ] | `99aa556e88` | 2026-05-08 | Cooltey Feng | 1f, +5/−35 | Remove migration code and fix possible error in the WikiGames (#6574) |
-| [ ] | `c46e647f55` | 2026-05-08 | Dmitry Brant | 7f, +30/−18 | Make ReadingLists correctly use remote Create and Modify time. (#6575) |
-| [ ] | `b88c6a672e` | 2026-05-11 | translatewiki.net | 10f, +229/−31 | Localisation updates from https://translatewiki.net. (#6579) |
-| [ ] | `996ad8592f` | 2026-05-11 | Dmitry Brant | 1f, +3/−3 | Strip style tags when displaying Wiktionary definitions. (#6580) |
-| [ ] | `40876929c5` | 2026-05-12 | Cooltey Feng | 1f, +1/−1 | Bump versionCode. (#6584) |
-| [ ] | `684d2bc170` | 2026-05-12 | Stefan Sundin | 3f, +5/−1 | Configure `android:windowSplashScreenBackground` to avoid white flash when the app opens in dark mode. (#6577) |
-| [ ] | `7327ad2d0e` | 2026-05-13 | dependabot[bot] | 1f, +1/−1 | Bump gradle-wrapper from 9.5.0 to 9.5.1 (#6585) |
-| [ ] | `a3ac44de89` | 2026-05-13 | Dmitry Brant | 2f, +114/−0 | Strings for Home Feed. (#6586) |
-| [ ] | `abfb3f82e0` | 2026-05-13 | William Rai | 2f, +16/−6 | Additional strings for the Home feed (#6587) |
-| [ ] | `2b65f37182` | 2026-05-13 | Gyrandola | 1f, +1/−1 | Fix: increases search widget medium-size threshold (#6522) |
-| [ ] | `29e8261693` | 2026-05-13 | Cooltey Feng | 10f, +90/−37 | Instrumentation for app_open events (#6576) |
-| [ ] | `64da8320a4` | 2026-05-13 | Cooltey Feng | 2f, +17/−13 | Add strings for swipe-to-explore prompt in the new explore feed (#6589) |
-| [ ] | `f1d1a94f86` | 2026-05-14 | Cooltey Feng | 2f, +2/−2 | Fix: add the correct contentDescription to the close icon in tab items (#6593) |
-| [ ] | `365bd9be6f` | 2026-05-14 | William Rai | 2f, +8/−0 | - strings for empty state (#6594) |
-| [ ] | `faea574716` | 2026-05-14 | dependabot[bot] | 1f, +1/−1 | Bump com.google.devtools.ksp from 2.3.7 to 2.3.8 in the kotlin-ksp group (#6588) |
-| [ ] | `027acdf6b3` | 2026-05-14 | dependabot[bot] | 1f, +1/−1 | Bump com.google.android.material:material from 1.13.0 to 1.14.0 (#6590) |
-| [ ] | `98a3120b79` | 2026-05-15 | William Rai | 1f, +1/−1 | - string update (#6600) |
-| [ ] | `d9630fab94` | 2026-05-18 | translatewiki.net | 22f, +924/−120 | Localisation updates from https://translatewiki.net. (#6602) |
-| [ ] | `836543c9f7` | 2026-05-18 | William Rai | 2f, +10/−0 | [Explore Feed] For you empty state strings (#6603) |
-| [ ] | `bf13277f15` | 2026-05-18 | Cooltey Feng | 1f, +30/−8 | Update AGENTS.md (#6564) |
-| [ ] | `51ea875719` | 2026-05-19 | Dmitry Brant | 1f, +6/−0 | Add unit test for transforming thumbnail URLs with URL parameters. (#6605) |
-| [ ] | `e164df3609` | 2026-05-19 | William Rai | 2f, +18/−0 | - strings for what's driving your feed setting (#6608) |
-| [ ] | `19668e0979` | 2026-05-19 | Dmitry Brant | 2f, +2/−9 | Test kitchen: Limit max number of languages in performerData. (#6609) |
-| [ ] | `efeefd187c` | 2026-05-20 | dependabot[bot] | 1f, +1/−1 | Bump androidx.compose.ui:ui-graphics from 1.11.1 to 1.11.2 (#6611) |
-| [ ] | `89ae7913a7` | 2026-05-20 | dependabot[bot] | 1f, +1/−1 | Bump androidx.compose:compose-bom from 2026.05.00 to 2026.05.01 (#6612) |
-| [ ] | `016fff831f` | 2026-05-21 | translatewiki.net | 16f, +513/−30 | Localisation updates from https://translatewiki.net. (#6617) |
-| [ ] | `20cc80172d` | 2026-05-21 | Cooltey Feng | 144f, +11011/−560 | [Feature branch] Explore Feed Redesign (#6446) |
-| [ ] | `d526598ac6` | 2026-05-21 | Cooltey Feng | 1f, +1/−1 | Bump versionCode. (#6620) |
-| [ ] | `50424247f4` | 2026-05-21 | Cooltey Feng | 4f, +8/−3 | Fix: update the homeLanguage during onboarding and undo the changes in updateSelectedLanguageIfNeeded (#6621) |
-| [ ] | `8cbc88d004` | 2026-05-21 | Cooltey Feng | 1f, +1/−1 | Bump versionCode. (#6622) |
-| [ ] | `4260ebcfce` | 2026-05-22 | Dmitry Brant | 1f, +9/−20 | Show announcements by allowlist, not denylist. (#6624) |
-| [ ] | `8268b4a251` | 2026-05-22 | William Rai | 1f, +1/−1 | - string update (#6625) |
-| [ ] | `f74f200812` | 2026-05-22 | Cooltey Feng | 1f, +18/−4 | Fix: refresh the Feed content when the language is inconsistent (#6623) |
-| [ ] | `29604f7c71` | 2026-05-22 | Dmitry Brant | 3f, +34/−36 | Home feed: Tweak/improve Continue Reading logic. (#6626) |
-| [ ] | `d827c1b03c` | 2026-05-26 | translatewiki.net | 84f, +766/−442 | Localisation updates from https://translatewiki.net. (#6633) |
-| [ ] | `d11edd58e3` | 2026-05-26 | Cooltey Feng | 1f, +14/−7 | Fix: when the tab icon or notification icon appears, the toolbar moves (#6630) |
-| [ ] | `36aab1c3fd` | 2026-05-26 | Dmitry Brant | 2f, +336/−319 | Home feed: properly use RTL or LTR layout based on language. (#6634) |
-| [ ] | `e97b3b6af3` | 2026-05-26 | Cooltey Feng | 1f, +1/−0 | Fix: image caption and license should be visible by default (#6635) |
-| [ ] | `6d890ec0a3` | 2026-05-26 | Cooltey Feng | 2f, +32/−5 | Fix: use LaunchedEffect to resolve the overflow animation issue on (#6629) |
-| [ ] | `7311d3d1c3` | 2026-05-26 | Hakan | 2f, +144/−6 | Fix nested display:none span handling in CustomHtmlParser (#6631) |
-| [ ] | `b7ac078dad` | 2026-05-26 | Dmitry Brant | 2f, +8/−4 | Improve display of Blocked messages, and make snackbar selectable. (#6636) |
-| [ ] | `ab19004b73` | 2026-05-26 | Cooltey Feng | 1f, +1/−1 | Bump versionCode. (#6638) |
-| [ ] | `49381781fa` | 2026-05-27 | dependabot[bot] | 1f, +1/−1 | Bump com.google.devtools.ksp from 2.3.8 to 2.3.9 in the kotlin-ksp group (#6639) |
-| [ ] | `026dbd6c8b` | 2026-05-27 | William Rai | 2f, +22/−29 | - multiples recomposition fixes in pageIndicator and FadeAsyncImage (#6637) |
-| [ ] | `c40da836be` | 2026-05-27 | Dmitry Brant | 1f, +1/−2 | Home feed: set funnel name when initializing. (#6641) |
-| [ ] | `480a19f0aa` | 2026-05-27 | William Rai | 5f, +1463/−1337 | - splits home fragment to dedicated composables. ForYouContentTab.kt, CommunityContentTab.kt, HomeScreen.kt and shared FeedComponents.kt. (#6640) |
-| [ ] | `1b52136556` | 2026-05-28 | translatewiki.net | 13f, +353/−48 | Localisation updates from https://translatewiki.net. (#6644) |
-| [ ] | `0c4d8a2e33` | 2026-05-28 | Cooltey Feng | 1f, +1/−1 | Bump versionCode. (#6645) |
-| [ ] | `e690c486af` | 2026-05-29 | Cooltey Feng | 1f, +1/−1 | Fix: avoid showing duplicated continue reading articles in Home feed. (#6646) |
-| [ ] | `fbbc8c6f57` | 2026-06-01 | translatewiki.net | 12f, +725/−26 | Localisation updates from https://translatewiki.net. (#6651) |
-| [ ] | `052d4fff08` | 2026-06-01 | William Rai | 2f, +17/−24 | - reloads reactively when language and tab changes (#6628) |
-| [ ] | `7d405c6736` | 2026-06-01 | Brooke Vibber | 1f, +4/−3 | Update address for bvibber (#6653) |
-| [ ] | `2cbae2b837` | 2026-06-01 | Cooltey Feng | 133f, +77/−6957 | Clean up Explore feed codes (#6649) |
-| [ ] | `08116872ab` | 2026-06-01 | Dmitry Brant | 1f, +2/−2 | Fix potential crash when displaying overflow menu in Notifications. (#6652) |
-| [ ] | `e422eb7a01` | 2026-06-02 | Dmitry Brant | 14f, +39/−165 | Further cleanup of old Explore feed, and fixes. (#6654) |
-| [ ] | `e98c308a68` | 2026-06-02 | Dmitry Brant | 1f, +60/−0 | Randomizer: enable shake-to-shuffle. (#6655) |
-| [ ] | `b5145a8c2a` | 2026-06-02 | William Rai | 7f, +265/−115 | [Explore Feed] For you content end of feed (#6642) |
-| [ ] | `440b6555bb` | 2026-06-02 | William Rai | 1f, +1/−1 | Bump versionCode. (#6657) |
-| [ ] | `c2c5fc3c9a` | 2026-06-04 | translatewiki.net | 9f, +39/−14 | Localisation updates from https://translatewiki.net. (#6661) |
-| [ ] | `df875dc049` | 2026-06-04 | Dmitry Brant | 1f, +91/−82 | Possible fix for T395597 (#6659) |
-| [ ] | `4f936f143a` | 2026-06-04 | William Rai | 26f, +45/−881 | [Explore feed] Android instrumented test cleanup (#6656) |
-| [ ] | `da68484428` | 2026-06-04 | Tyler Heck | 20f, +289/−80 | T427722: Update Launcher Icon and Splash Screen (#6650) |
-| [ ] | `09917ef4b2` | 2026-06-04 | William Rai | 6f, +100/−100 | [Explore Feed] reactive hidden card using data store  (#6658) |
-| [ ] | `3a901fcf6e` | 2026-06-05 | Dmitry Brant | 12f, +346/−3 | Home Feed: Did You Know (#6662) |
-| [ ] | `171fa6650c` | 2026-06-05 | Dmitry Brant | 11f, +71/−191 | Introduce preview conveniences for PageTitle and PageSummary. (#6664) |
-| [ ] | `9de3822311` | 2026-06-05 | Dmitry Brant | 10f, +223/−15 | Home Feed: Random article (#6663) |
-| [ ] | `ae1c137422` | 2026-06-08 | translatewiki.net | 16f, +126/−19 | Localisation updates from https://translatewiki.net. (#6665) |
-| [ ] | `ac1fc58efd` | 2026-06-08 | William Rai | 17f, +528/−17 | [Explore Feed] Places of Interest Module (#6648) |
-| [ ] | `dd6b000088` | 2026-06-08 | William Rai | 1f, +1/−1 | Bump versionCode. (#6666) |
-| [ ] | `f59bc9aafe` | 2026-06-09 | Kevin Galligan | 1f, +10/−0 | sync plan |
+| Done | Commit | Date | Author | Size | Summary | Results |
+|------|--------|------|--------|------|---------|---------|
+| [ ] | `af457ff7ae` | 2026-02-20 | Dmitry Brant | 55f, +2413/−292 | Hybrid search (feature branch) (#6221) | Candidate: Introduces hybrid (semantic+lexical) search experiment with onboarding and feedback UI; new product feature iOS would implement. |
+| [ ] | `eca7eac6e6` | 2026-02-20 | Cooltey Feng | 3f, +39/−15 | Fix: handle dismiss/undo card behavior correctly for WikiGames Card (#6322) | Candidate: Verify iOS games Explore card (WMFDailyGameExploreCell) dismiss/undo toggles the games feed setting like Android now does. |
+| [x] | `ab00f5a8dd` | 2026-02-20 | William Rai | 1f, +3/−1 | Fixes an issue where the Explore feed card visibility didn’t update when toggling languages from the horizontal list in ConfigureActivity (#6338) | Excluded: Rule B: fixes Android-only activity-result change-detection bug for feed refresh; no product behavior change applicable to iOS. |
+| [x] | `6c6ce5193c` | 2026-02-23 | translatewiki.net | 25f, +50/−43 | Localisation updates from https://translatewiki.net. (#6339) | Excluded: Localization sync; iOS has own translatewiki pipeline |
+| [ ] | `517351d4cd` | 2026-02-24 | Dmitry Brant | 14f, +289/−46 | Hybrid search: instrumentation. (#6337) | Candidate: Hybrid search originated at window anchor af457ff7ae; iOS port would need matching experiment instrumentation events and search close-button fix. |
+| [ ] | `e17bbd4e49` | 2026-02-24 | Cooltey Feng | 1f, +10/−1 | Fix: Handle insufficient events for WikiGames and avoid getting stuck in the error page (#6342) | Candidate: Game-logic fix for insufficient On This Day events; iOS Which Came First game may need same fallback to avoid error-page lockup. |
+| [x] | `cab384d412` | 2026-02-24 | William Rai | 1f, +1/−1 | Bump versionCode. (#6343) | Excluded: versionCode bump; iOS has independent versioning |
+| [x] | `7bcbde2866` | 2026-02-25 | William Rai | 1f, +7/−0 | Update testTranslateWikiQQ to fail test if qq contains extra strings (#6344) | Excluded: Rule A: Android-only unit test change for translatewiki qq string validation; no product behavior. |
+| [x] | `76534641a9` | 2026-02-25 | dependabot[bot] | 1f, +1/−1 | Bump coilCompose from 3.3.0 to 3.4.0 (#6345) | Excluded: Dependabot dependency bump; iOS has own dependency management |
+| [x] | `3f5acb1ee9` | 2026-02-26 | translatewiki.net | 6f, +108/−2 | Localisation updates from https://translatewiki.net. (#6349) | Excluded: Localization sync; iOS has own translatewiki pipeline |
+| [ ] | `9512546822` | 2026-02-26 | Cooltey Feng | 1f, +24/−5 | Fix: show the bottom bar even if no results in title-only screen in Semantic search (#6347) | Candidate: Hybrid search UX fix: show semantic-search bottom bar on empty title-only results; feature originated at window base, so uncertainty keeps it candidate. |
+| [ ] | `4778ade23b` | 2026-02-26 | Cooltey Feng | 3f, +10/−1 | Show up keyboard when showing no results in the title-only screen for Semantic search (#6350) | Candidate: Semantic search UX tweak (show keyboard on empty title-only results); feature originates at window boundary commit, so no-backfill exclusion is uncertain. |
+| [x] | `de2684bce4` | 2026-03-02 | translatewiki.net | 6f, +159/−24 | Localisation updates from https://translatewiki.net. (#6354) | Excluded: Localization sync from translatewiki; iOS has own translation pipeline |
+| [ ] | `b7745030f3` | 2026-03-02 | Cooltey Feng | 1f, +1/−1 | Hybrid Search: update learn_button to learn_more (#6352) | Candidate: Hybrid Search originates at sync window base, so port: onboarding analytics elementId should be learn_more, not learn_button. |
+| [x] | `00dbe762e6` | 2026-03-02 | dependabot[bot] | 1f, +1/−1 | Bump androidx.compose:compose-bom from 2026.02.00 to 2026.02.01 (#6356) | Excluded: Dependabot dependency bump; iOS has separate dependency management |
+| [ ] | `fe1486bbed` | 2026-03-03 | Dmitry Brant | 1f, +4/−1 | Fix subtle Game bug when saving progress on last question. (#6360) | Candidate: Game progress bug fix: mark game completed when saving on last question; iOS Which Came First game may need same check. |
+| [ ] | `4824d3a9f7` | 2026-03-03 | Dmitry Brant | 1f, +8/−12 | Adjust Game algorithm to account for days with insufficient events. (#6358) | Candidate: On This Day game pairing algorithm fix for days with few events; iOS has Which Came First game and may need same logic. |
+| [x] | `0e5261db2e` | 2026-03-03 | William Rai | 1f, +1/−1 | Bump versionCode. (#6357) | Excluded: versionCode bump only; iOS manages versioning independently |
+| [x] | `837d6a0650` | 2026-03-03 | dependabot[bot] | 1f, +1/−1 | Bump com.android.application from 9.0.1 to 9.1.0 (#6361) | Excluded: Dependency bump; Android gradle version. iOS has separate build system. |
+| [x] | `13503d1fa2` | 2026-03-03 | dependabot[bot] | 1f, +1/−1 | Bump com.github.skydoves:balloon from 1.7.3 to 1.7.4 (#6362) | Excluded: Dependabot dependency bump; iOS has own dependency management |
+| [ ] | `2e336358d3` | 2026-03-03 | Dmitry Brant | 1f, +1/−1 | Update image dimming coefficient to match mobile web. (#6363) | Candidate: User-visible dark-mode image dimming strength changed to match mobile web; iOS has image dimming and may need the same coefficient update. |
+| [x] | `148284e898` | 2026-03-04 | Dmitry Brant | 6f, +26/−27 | Instrumentation: introduce default actionSource parameter. (#6366) | Excluded: Behavior-identical analytics refactor; iOS WMFTestKitchen InstrumentImpl already implements setDefaultActionSource with identical fallback logic (rule B, already ported). |
+| [x] | `29651df144` | 2026-03-04 | dependabot[bot] | 3f, +2/−2 | Bump gradle-wrapper from 9.3.1 to 9.4.0 (#6365) | Excluded: Gradle wrapper version bump; iOS uses Xcode build system |
+| [x] | `1bb599ca9f` | 2026-03-05 | translatewiki.net | 9f, +236/−15 | Localisation updates from https://translatewiki.net. (#6368) | Excluded: Localization sync; iOS has own translatewiki pipeline |
+| [x] | `57b418df7d` | 2026-03-06 | Dmitry Brant | 18f, +39/−20 | Upgrade ktlint to 1.8.0. (#6371) | Excluded: Rule A: ktlint dependency upgrade plus lint-style fixes only; Android build tooling, no product behavior change. |
+| [x] | `26e53d77c0` | 2026-03-06 | dependabot[bot] | 3f, +3/−3 | Bump actions/upload-artifact from 6 to 7 (#6355) | Excluded: GitHub Actions CI/CD dependency bump only; iOS has separate CI/CD infrastructure |
+| [x] | `5f53119c03` | 2026-03-09 | translatewiki.net | 6f, +31/−8 | Localisation updates from https://translatewiki.net. (#6375) | Excluded: Localization sync; iOS has own translatewiki pipeline |
+| [ ] | `2d908c3384` | 2026-03-09 | Dmitry Brant | 15f, +152/−32 | Instrumentation: underpinnings for sending events to logging intake. (#6370) | Candidate: iOS could enrich ClientErrorFunnel to match: stack traces, error class, and automatic HTTP-failure logging to logging intake. |
+| [ ] | `6240fa0d02` | 2026-03-09 | Dmitry Brant | 6f, +49/−28 | Semantic search: update API, and enable for FR. (#6373) | Candidate: Hybrid/semantic search feature originated at window boundary commit; iOS would add semantic search API, FR language support, and x-search-id analytics. |
+| [x] | `6d0b3e0c4e` | 2026-03-09 | Dmitry Brant | 1f, +10/−10 | Hybrid search: French strings. (#6376) | Excluded: Rule A: French localization string updates only, no product behavior change. |
+| [x] | `80c5898f4e` | 2026-03-09 | Cooltey Feng | 1f, +1/−1 | Bump versionCode. (#6378) | Excluded: versionCode bump in app/build.gradle; iOS has its own versioning |
+| [ ] | `763158c976` | 2026-03-11 | Dmitry Brant | 1f, +8/−1 | Don't log HTTP errors for 320px thumbnail requests. (#6383) | Candidate: iOS has ClientErrorFunnel; may need same skip of client_error logging for 320px thumbnail HTTP failures (Commons rate-limit noise). |
+| [x] | `e95b52efc6` | 2026-03-11 | Cooltey Feng | 2f, +15/−3 | HybridSearch: French sample queries update (#6382) | Excluded: No-backfill rule: HybridSearch absent from iOS and introduced at window base af457ff7ae, before the sync window; only adds French sample queries. |
+| [ ] | `6c43d3fe3c` | 2026-03-11 | Dmitry Brant | 2f, +12/−4 | Apply User-agent header to MediaPlayer instances. (#6386) | Candidate: iOS AVPlayer media playback (e.g. pronunciation audio) lacks app User-Agent header; apply it via AVURLAsset HTTP header options. |
+| [ ] | `8b7b08008f` | 2026-03-11 | Dmitry Brant | 2f, +2/−2 | When matching system Dark theme, default to Dark theme instead of Black. (#6384) | Candidate: User-facing change: system dark mode defaults to Dark not Black; iOS has same Black default in NSUserDefaults+WMFExtensions.swift line 159. |
+| [x] | `bf9aa2a5f7` | 2026-03-11 | Cooltey Feng | 1f, +1/−1 | Bump versionCode. (#6385) | Excluded: versionCode bump only; iOS has its own versioning |
+| [x] | `232b9d4af5` | 2026-03-12 | dependabot[bot] | 1f, +1/−1 | Bump androidx.activity:activity-compose from 1.12.4 to 1.13.0 (#6390) | Excluded: Dependabot dependency bump only; iOS has own dependency management |
+| [x] | `d535d2d56b` | 2026-03-12 | translatewiki.net | 7f, +75/−16 | Localisation updates from https://translatewiki.net. (#6388) | Excluded: Localization sync; iOS has own translatewiki pipeline |
+| [x] | `518603c85c` | 2026-03-12 | dependabot[bot] | 1f, +1/−1 | Bump androidx.paging:paging-runtime-ktx from 3.4.1 to 3.4.2 (#6389) | Excluded: Dependabot dependency bump; iOS has own dependency management |
+| [x] | `64c8c19892` | 2026-03-12 | Dmitry Brant | 6f, +4/−42 | No longer explicitly set user preferences for Push notifications. (#6394) | Excluded: Rule C: removes pre-window Android-only behavior of setting server-side echo push options; iOS never set these, already matches resulting behavior. |
+| [x] | `1000bc2690` | 2026-03-12 | dependabot[bot] | 1f, +1/−1 | Bump androidx.paging:paging-compose from 3.4.1 to 3.4.2 (#6393) | Excluded: Dependabot dependency version bump; iOS has separate dependency management |
+| [x] | `19f2e7f198` | 2026-03-13 | dependabot[bot] | 1f, +1/−1 | Bump androidx.core:core-ktx from 1.17.0 to 1.18.0 (#6392) | Excluded: Dependabot dependency bump in gradle/libs.versions.toml; iOS has independent dependency management |
+| [x] | `15b6c60124` | 2026-03-13 | dependabot[bot] | 1f, +1/−1 | Bump com.github.skydoves:balloon from 1.7.4 to 1.7.5 (#6380) | Excluded: Dependabot patch version bump of balloon library in gradle/libs.versions.toml |
+| [x] | `3270449349` | 2026-03-13 | dependabot[bot] | 1f, +1/−1 | Bump androidx.compose:compose-bom from 2026.02.01 to 2026.03.00 (#6391) | Excluded: Dependabot dependency version bump in gradle/libs.versions.toml; iOS has own dependency management |
+| [x] | `97ff25cb3d` | 2026-03-16 | translatewiki.net | 3f, +13/−7 | Localisation updates from https://translatewiki.net. (#6395) | Excluded: Localization sync from translatewiki.net; iOS has own translation pipeline |
+| [ ] | `1765bf32f9` | 2026-03-16 | VeryFat123 | 6f, +7/−16 | No longer use notwikis parameter in notifications API calls. (#6381) | Candidate: iOS RemoteNotificationsAPIController also joins wikis into notwikis; should use notwikis=* to avoid the 50-wiki API limit error. |
+| [x] | `a28cfec3f5` | 2026-03-17 | dependabot[bot] | 1f, +1/−1 | Bump ncipollo/release-action from 1.20.0 to 1.21.0 (#6397) | Excluded: GitHub Actions workflow dependency bump; Android CI/CD only |
+| [x] | `fdb9d5722b` | 2026-03-17 | dependabot[bot] | 1f, +1/−1 | Bump kotlinStdlibJdk8 from 2.3.10 to 2.3.20 (#6399) | Excluded: Dependabot dependency bump; iOS has separate dependency management |
+| [ ] | `c70a46498a` | 2026-03-17 | William Rai | 55f, +2409/−710 | [Feature Branch] WikiGames Update (#6325) | Candidate: Major user-facing WikiGames update: Games Hub, feed card game states, archive calendar, results screen; iOS has the games feature (WhichCameFirst). |
+| [x] | `fc23ea01ae` | 2026-03-17 | Dmitry Brant | 2f, +38/−33 | Fix potential crash from re-adding events to queue. (#6403) | Excluded: Rule B: JVM BlockingQueue crash fix in testkitchen SDK internals; iOS TestKitchen has no event queue, so nothing to port. |
+| [x] | `ea4fc42598` | 2026-03-17 | Cooltey Feng | 1f, +1/−1 | Bump versionCode. (#6404) | Excluded: versionCode bump only; iOS has own versioning system |
+| [ ] | `ffd1c5d115` | 2026-03-17 | Cooltey Feng | 3f, +1/−9 | WikiGames: remove "Learn more" CTA from the snackbar after close (#6402) | Candidate: User-facing WikiGames change: remove Learn more CTA from game-entry dismissal message; iOS has the Which Came First game and similar learn-more UI. |
+| [x] | `ca1be9f0af` | 2026-03-17 | William Rai | 5f, +24/−6 | Wikigames design review fixes (#6400) | Excluded: Rule B: Android-only Material styling polish (padding, elevation, font weights, popup background); no product behavior change relevant to iOS. |
+| [ ] | `53dfbc934d` | 2026-03-18 | Cooltey Feng | 1f, +14/−12 | WikiGames: do not show image placeholder when the URL is empty (#6406) | Candidate: User-visible fix: hide game event image when thumbnail URL is missing; iOS games UI should apply the same empty-thumbnail handling. |
+| [ ] | `ed8a5dde85` | 2026-03-18 | Dmitry Brant | 3f, +4/−77 | Semantic search: enable for EN and PT, and rip out for EL. (#6408) | Candidate: Hybrid search behavior change (EN/PT enabled, Greek custom endpoint removed); feature originates at sync window start, so iOS port should match. |
+| [x] | `f28c0fe37d` | 2026-03-18 | Dmitry Brant | 15f, +5/−246 | Rip out Year-in-Review reading list a/b test. (#6405) | Excluded: Removes Android-only YiR reading-list A/B test (android_yir_2025 buckets) that predates the window and never existed on iOS; no-backfill rule applies. |
+| [ ] | `b52ce5b270` | 2026-03-18 | Dmitry Brant | 1f, +1/−1 | Fix rate-limiting issue with Random articles in the Feed. (#6410) | Candidate: Feed Random card exists on iOS; consider capping parallel random fetches to 5 languages to avoid API rate limiting. |
+| [ ] | `a91e456007` | 2026-03-18 | Dmitry Brant | 16f, +240/−93 | Instrumentation for authentication workflows. (#6369) | Candidate: Adds apps-authentication analytics instrumentation to login, create account, logout, and captcha flows; iOS would need equivalent event instrumentation. |
+| [ ] | `9ddfb7f727` | 2026-03-18 | Dmitry Brant | 1f, +3/−10 | Semantic search: fix/simplify progress bar logic. (#6409) | Candidate: Fixes loading-indicator behavior in hybrid/semantic search, a feature introduced at the sync window start; iOS port needs equivalent progress logic. |
+| [x] | `63ae0be906` | 2026-03-18 | William Rai | 1f, +1/−1 | - removes the extra padding between the Login button (#6413) | Excluded: Rule B: one-line Android Compose padding fix in games login button; cosmetic Android layout artifact, iOS layouts are independent. |
+| [x] | `73b3b6408a` | 2026-03-19 | translatewiki.net | 52f, +228/−283 | Localisation updates from https://translatewiki.net. (#6415) | Excluded: Localization sync from translatewiki.net; iOS has own pipeline |
+| [x] | `5be171920e` | 2026-03-19 | Dmitry Brant | 3f, +26/−26 | Semantic search: no longer stuff result lists into actionContext. (#6419) | Excluded: Rule C: tweaks hybrid/semantic search analytics; feature absent from iOS and introduced at window base af457ff7ae, outside the window. |
+| [x] | `c8c32f212a` | 2026-03-19 | Cooltey Feng | 1f, +1/−1 | Bump versionCode. (#6423) | Excluded: versionCode bump; iOS has its own versioning pipeline |
+| [x] | `cc4b73a619` | 2026-03-20 | dependabot[bot] | 2f, +2/−2 | Bump gradle-wrapper from 9.4.0 to 9.4.1 (#6418) | Excluded: Gradle wrapper version bump; iOS uses Xcode/Swift, not Gradle |
+| [ ] | `7a446fbc0e` | 2026-03-20 | Dmitry Brant | 3f, +26/−7 | Semantic search: Portuguese translation update. (#6425) | Candidate: Adds Portuguese example queries and copy for Hybrid Search onboarding; feature originates at window base, so iOS port would need same content. |
+| [x] | `df869fb02e` | 2026-03-20 | Dmitry Brant | 2f, +2/−2 | Event logging: display Toast upon errors in Alpha, not just Dev. (#6426) | Excluded: Android-only debug tooling: widens QA error Toast to Alpha build flavor; no user-facing behavior relevant to iOS. |
+| [ ] | `5eeffeb144` | 2026-03-20 | Dmitry Brant | 3f, +22/−8 | TestKitchen: allow Instrument to set its own MediaWiki dbname. (#6424) | Candidate: iOS TestKitchen supports custom mediawikiDatabase but no instrument-level default, and search events do not yet tag the searched wiki dbname. |
+| [ ] | `8b8b7c2f87` | 2026-03-20 | Dmitry Brant | 7f, +131/−40 | Hybrid search: reintroduce Greek. (#6427) | Candidate: Hybrid search feature originates at window boundary and evolves in-window; iOS would add Greek semantic search via new service plus experiment logging. |
+| [x] | `7566c64410` | 2026-03-20 | Dmitry Brant | 1f, +1/−1 | Bump versionCode. (#6429) | Excluded: versionCode bump only; iOS has independent versioning scheme |
+| [x] | `6e8661bb6a` | 2026-03-20 | William Rai | 1f, +0/−2 | - espresso fixes (#6417) | Excluded: Rule A: Espresso instrumented-test fix in BaseTest.kt only; Android-only test tooling, no product behavior change. |
+| [x] | `0935bf2406` | 2026-03-23 | translatewiki.net | 10f, +1912/−51 | Localisation updates from https://translatewiki.net. (#6431) | Excluded: Localization sync; iOS has own translatewiki pipeline |
+| [x] | `051cb9e54c` | 2026-03-23 | Cooltey Feng | 1f, +25/−23 | Fix: possible crash when refresh the WikiGames cards on the Explore Feed (#6430) | Excluded: Rule B: Android-only crash fix for stale RecyclerView indices when refreshing WikiGames feed cards; no product-behavior change. |
+| [x] | `64d7e74608` | 2026-03-23 | Dmitry Brant | 1f, +14/−3 | Add convenience to BottomSheetDialog to start in expanded state. (#6433) | Excluded: Rule B: Android-only plumbing adding startExpanded option to BottomSheetDialogFragment base class; no caller or user-visible behavior change. |
+| [x] | `757b433505` | 2026-03-24 | Dmitry Brant | 2f, +1/−2 | Update ktlint rules to add unused-imports rule. (#6437) | Excluded: Rule A: ktlint config change plus unused-import removal; Android-only lint tooling with no product behavior change. |
+| [ ] | `b50237e6a0` | 2026-03-24 | Dmitry Brant | 1f, +1/−0 | Fix missing callback for HCaptcha instrumentation. (#6438) | Candidate: Fixes missing hCaptcha-shown instrumentation event; iOS has hCaptcha (WMFHCaptchaViewController) and should verify its shown event fires. |
+| [ ] | `7c8259f06a` | 2026-03-24 | Dmitry Brant | 1f, +2/−4 | Semantic search instrumentation: send search-id for thumbs up/down. (#6441) | Candidate: Hybrid search originates at window boundary and iOS has TestKitchen; thumbs up/down events should send search-id in actionContext. |
+| [ ] | `ce3b24a1e3` | 2026-03-24 | William Rai | 9f, +61/−15 | Instrumentation for games hub (#6434) | Candidate: Adds Games Hub analytics events (impression, play, archive clicks); hub introduced in window, so iOS port needs matching instrumentation. |
+| [x] | `f4a1922bcc` | 2026-03-25 | dependabot[bot] | 1f, +1/−1 | Bump androidx.work:work-runtime-ktx from 2.11.1 to 2.11.2 (#6445) | Excluded: Dependabot dependency bump; iOS has its own dependency management |
+| [x] | `8075f8ca3b` | 2026-03-25 | Dmitry Brant | 8f, +119/−95 | Hybrid search: expanded instrumentation. (#6448) | Excluded: Rule C: analytics instrumentation for hybrid search experiment, absent on iOS and introduced at window base, not inside window. No user-facing change. |
+| [x] | `bb95b4dea8` | 2026-03-26 | translatewiki.net | 8f, +39/−8 | Localisation updates from https://translatewiki.net. (#6450) | Excluded: Localization sync from translatewiki.net; iOS has own translation pipeline |
+| [ ] | `cb5af17ea7` | 2026-03-26 | Dmitry Brant | 1f, +1/−1 | Hybrid search: Update verbiage string. (#6451) | Candidate: User-facing Hybrid Search copy change; feature originated at the sync window base commit, so iOS port should use "human written" wording. |
+| [x] | `2d44e869cb` | 2026-03-26 | Dmitry Brant | 1f, +1/−1 | Bump versionCode. (#6454) | Excluded: versionCode bump only; iOS has independent versioning |
+| [x] | `2fa7fd5f52` | 2026-03-26 | dependabot[bot] | 1f, +1/−1 | Bump androidx.compose:compose-bom from 2026.03.00 to 2026.03.01 (#6452) | Excluded: Dependency bump; Compose BOM version change. iOS has own dependency management. |
+| [ ] | `0f8a7f279f` | 2026-03-26 | William Rai | 2f, +132/−0 | - adds reading challenge widgets (#6455) | Candidate: Adds new Reading Challenge widget product copy (onboarding, streak states, reminders, prizes); iOS has this widget and may need matching strings/states. |
+| [x] | `3c297e3a52` | 2026-03-27 | dependabot[bot] | 1f, +1/−1 | Bump androidx.browser:browser from 1.9.0 to 1.10.0 (#6453) | Excluded: Dependency bump (androidx.browser); iOS has own dependency management |
+| [x] | `d2a601641b` | 2026-03-27 | dependabot[bot] | 1f, +1/−1 | Bump org.maplibre.gl:android-sdk from 12.2.2 to 12.3.0 (#6189) | Excluded: Dependabot dependency bump; iOS has own dependency management |
+| [x] | `b2d724fbd1` | 2026-03-27 | Dmitry Brant | 1f, +1/−0 | Don't restart SearchActivity on configuration changes. (#6457) | Excluded: Rule B: AndroidManifest configChanges tweak to avoid activity recreation on rotation; Android lifecycle plumbing with no iOS equivalent. |
+| [x] | `0d33204efd` | 2026-03-30 | translatewiki.net | 29f, +927/−109 | Localisation updates from https://translatewiki.net. (#6462) | Excluded: Localization sync from translatewiki.net; iOS has own localization pipeline |
+| [x] | `0614bedaba` | 2026-03-30 | William Rai | 1f, +1/−1 | Bump versionCode. (#6464) | Excluded: versionCode bump; iOS has independent versioning system |
+| [x] | `c4c6ed86a6` | 2026-03-31 | dependabot[bot] | 1f, +1/−1 | Bump gradle/actions from 5 to 6 (#6463) | Excluded: Gradle Actions dependency bump in Android CI workflow; iOS has separate pipeline |
+| [x] | `3db8ee25d7` | 2026-03-31 | Dmitry Brant | 1f, +3/−0 | Add minimal security policy file. (#6466) | Excluded: Rule A: adds repo-level SECURITY documentation file only; no app code or product behavior changed. |
+| [ ] | `4180257433` | 2026-03-31 | Dmitry Brant | 1f, +3/−3 | Instrumentation: send create_source with success event. (#6465) | Candidate: Account-creation analytics fix: rename invoke_source to create_source and attach it to success event; iOS create-account funnel likely needs matching change. |
+| [x] | `36f8e06d60` | 2026-03-31 | Dmitry Brant | 4f, +58/−2 | Allow edge-to-edge for MainActivity, enabling full-bleed compositions. (#6444) | Excluded: Rule B: Android-only edge-to-edge window insets and ActionMode status bar plumbing; iOS handles safe areas natively, no product behavior change. |
+| [x] | `9b934fcafd` | 2026-03-31 | Dmitry Brant | 1f, +3/−3 | Properly limit cross-domain sharing of CentralAuth cookies. (#6469) | Excluded: Rule B: fixes suffix-matching bug in Android's custom cookie manager; iOS copies CentralAuth cookies via explicit domain allowlist, so bug cannot exist there. |
+| [ ] | `45e09e3135` | 2026-04-01 | Dmitry Brant | 3f, +19/−5 | Verify URLs from VIEW intent before opening. (#6471) | Candidate: Security fix: validate incoming deep-link URLs are Wikimedia domains before opening in-app; iOS URL/scheme handling may need the same check. |
+| [ ] | `6c4c79006f` | 2026-04-01 | Dmitry Brant | 2f, +6/−2 | Limit supported hosts for deeplink scheme. (#6472) | Candidate: iOS also handles wikipedia:// scheme; should validate that custom-scheme deeplinks only accept *.wikipedia.org hosts in its URL routing. |
+| [x] | `d094f168bf` | 2026-04-01 | Dmitry Brant | 3f, +41/−28 | More complete fix of black status bar behind all ActionModes. (#6473) | Excluded: Rule B: Android-only fix for black status bar behind framework ActionModes in edge-to-edge mode; no iOS equivalent or behavior change. |
+| [x] | `6e625872da` | 2026-04-01 | Dmitry Brant | 1f, +1/−7 | No longer set CORS header on responses passed to WebView. (#6470) | Excluded: Rule B: removes CORS header workaround in Android OkHttp WebView interception layer; iOS has no equivalent CORS injection to remove. |
+| [x] | `b095dea213` | 2026-04-01 | William Rai | 2f, +3/−42 | - override status guard color when action mode is turned on (#6474) | Excluded: Rule B: Android-only fix for status bar guard color during ActionMode using appcompat resource override; no iOS-relevant behavior. |
+| [x] | `4c722eb9b0` | 2026-04-01 | dependabot[bot] | 1f, +1/−1 | Bump org.maplibre.gl:android-sdk from 13.0.1 to 13.0.2 (#6467) | Excluded: Dependabot dependency bump; iOS has own dependency management |
+| [x] | `41c103e677` | 2026-04-02 | translatewiki.net | 15f, +1181/−42 | Localisation updates from https://translatewiki.net. (#6476) | Excluded: Localization sync; iOS has own translatewiki pipeline |
+| [x] | `8d884515c2` | 2026-04-03 | Dmitry Brant | 1f, +13/−12 | Improve handling of insets in updated MainActivity. (#6480) | Excluded: Rule B: Android-only window inset/padding plumbing in MainActivity; no user-facing behavior relevant to iOS. |
+| [x] | `b0d9319859` | 2026-04-06 | translatewiki.net | 12f, +466/−12 | Localisation updates from https://translatewiki.net. (#6482) | Excluded: Localization sync from translatewiki; iOS has own l10n pipeline |
+| [x] | `f357109cfa` | 2026-04-06 | William Rai | 1f, +1/−1 | Bump versionCode. (#6483) | Excluded: versionCode bump; iOS has independent versioning |
+| [x] | `3e69b4ab40` | 2026-04-08 | Dmitry Brant | 1f, +11/−6 | Fix suggestions to add descriptions when description is empty. (#6487) | Excluded: Rule C: fixes Android-only Suggested Edits description-task provider; iOS lacks this feature and it predates the sync window. |
+| [x] | `04482b47eb` | 2026-04-09 | Dmitry Brant | 8f, +1198/−1165 | Periodic update of languages and static data. (#6489) | Excluded: Rule A: automated periodic static data and language list sync, no product behavior change. |
+| [x] | `cc34d95920` | 2026-04-09 | translatewiki.net | 11f, +192/−52 | Localisation updates from https://translatewiki.net. (#6490) | Excluded: Localization sync from translatewiki.net; iOS has independent localization pipeline |
+| [ ] | `3368259670` | 2026-04-09 | Dmitry Brant | 1f, +1/−1 | Add "abstract" to list of non-language domains. (#6492) | Candidate: iOS Router.swift URL routing should also treat abstract.wikipedia.org as a non-language domain (open externally, not as an article). |
+| [ ] | `027a1c2d1e` | 2026-04-09 | William Rai | 2f, +2/−2 | Games hub use correct action name (#6486) | Candidate: Games Hub analytics action-name fixes (archive_click, game_feed); hub was introduced in window, so iOS port should match these names. |
+| [x] | `b07d551b23` | 2026-04-09 | William Rai | 1f, +1/−1 | Bump versionCode. (#6493) | Excluded: versionCode bump; iOS has own versioning system |
+| [x] | `2459a1c047` | 2026-04-13 | translatewiki.net | 11f, +423/−38 | Localisation updates from https://translatewiki.net. (#6497) | Excluded: Localization sync from translatewiki; iOS has own translation pipeline |
+| [x] | `f60a7ee4fd` | 2026-04-13 | William Rai | 1f, +68/−30 | - fixes an issue on the Game Hub preview screen where larger display and font sizes caused the button text to disappear (#6496) | Excluded: Rule B: Android Compose layout bug fix for game card at large font scales; iOS layout is independent, no product behavior change. |
+| [x] | `2c70e69089` | 2026-04-14 | Dmitry Brant | 1f, +22/−1 | Compose HtmlText: introduce default LinkInteractionListener. (#6491) | Excluded: Rule B: default link listener for Android-only Compose HtmlText component; framework plumbing with no screen-level behavior change relevant to iOS. |
+| [x] | `b74f202c37` | 2026-04-14 | William Rai | 1f, +1/−1 | Bump versionCode. (#6500) | Excluded: versionCode bump; iOS has separate versioning |
+| [x] | `053decca72` | 2026-04-14 | dependabot[bot] | 1f, +1/−1 | Bump com.android.application from 9.1.0 to 9.1.1 (#6498) | Excluded: Dependabot dependency bump; Android-specific gradle plugin update |
+| [x] | `5875c905da` | 2026-04-14 | dependabot[bot] | 1f, +1/−1 | Bump org.jetbrains.kotlinx:kotlinx-serialization-json (#6494) | Excluded: Dependency bump in gradle build file; iOS has own dependency management |
+| [x] | `ef040114cd` | 2026-04-16 | translatewiki.net | 12f, +357/−30 | Localisation updates from https://translatewiki.net. (#6505) | Excluded: Localization sync from translatewiki; iOS has its own translation pipeline |
+| [x] | `6cb6efd4d2` | 2026-04-16 | Cooltey Feng | 1f, +1/−1 | Fix: update successColor in Sepia theme to `Green700` (#6506) | Excluded: Rule B: fixes Android Compose Sepia palette typo; iOS Sepia theme already uses successGreen, so no iOS change needed. |
+| [x] | `fb8aca0ae8` | 2026-04-17 | dependabot[bot] | 1f, +1/−1 | Bump com.github.skydoves:balloon from 1.7.5 to 1.7.6 (#6507) | Excluded: Dependabot dependency bump; iOS has own dependency management system |
+| [x] | `c1d6c3ac55` | 2026-04-20 | translatewiki.net | 12f, +68/−10 | Localisation updates from https://translatewiki.net. (#6510) | Excluded: Localization sync; iOS has own translatewiki pipeline |
+| [x] | `90f57515c6` | 2026-04-20 | dependabot[bot] | 2f, +29/−38 | Bump com.google.android.gms:play-services-wallet from 19.5.0 to 20.0.0 (#6495) | Excluded: Android-specific dependency bump with Play Services Wallet API migration, not applicable to iOS. |
+| [x] | `98c096bae4` | 2026-04-20 | dependabot[bot] | 1f, +3/−3 | Bump addressable from 2.8.7 to 2.9.0 (#6511) | Excluded: Dependabot dependency bump in Gemfile.lock only; iOS has own dependency management |
+| [x] | `b207fe15c4` | 2026-04-20 | Cooltey Feng | 1f, +1/−1 | Bump versionCode. (#6513) | Excluded: versionCode bump; iOS has independent versioning |
+| [x] | `a742986b9a` | 2026-04-21 | dependabot[bot] | 1f, +1/−1 | Bump org.jsoup:jsoup from 1.22.1 to 1.22.2 (#6512) | Excluded: Dependabot dependency bump (jsoup 1.22.1 to 1.22.2); iOS has own dependency management |
+| [ ] | `e190b1525e` | 2026-04-21 | Dmitry Brant | 2f, +12/−1 | API model underpinnings for Did You Know. (#6514) | Candidate: Adds Did You Know (dyk) model to aggregated feed API; iOS feed models would need matching dyk parsing for this new feature. |
+| [x] | `06c7f1c5a2` | 2026-04-21 | Dmitry Brant | 5f, +12/−7 | Introduce WikiSite convenience for composable Previews. (#6515) | Excluded: Rule B: Android-only Compose Preview helper (WikiSite.preview()) for developer previews; no user-visible behavior change. |
+| [x] | `35e34ec577` | 2026-04-23 | translatewiki.net | 11f, +410/−14 | Localisation updates from https://translatewiki.net. (#6523) | Excluded: Localization sync; iOS has own translatewiki pipeline |
+| [x] | `ff44428c1f` | 2026-04-23 | dependabot[bot] | 1f, +1/−1 | Bump androidx.navigation:navigation-compose from 2.9.7 to 2.9.8 (#6520) | Excluded: Dependabot dependency bump only; iOS manages dependencies independently |
+| [ ] | `438cc0642f` | 2026-04-24 | Dmitry Brant | 3f, +5/−11 | TestKitchen: handle case of streamConfigs being empty, not null. (#6528) | Candidate: TestKitchen client fix treating empty streamConfigs as missing; iOS has parallel WMFTestKitchen client that may need same handling. |
+| [ ] | `e8a40079f3` | 2026-04-24 | William Rai | 2f, +2/−0 | - string update (#6529) | Candidate: Adds parameterized Reading Challenge onboarding copy with dynamic date range; iOS has Reading Challenge and may need matching string update. |
+| [x] | `af927a671a` | 2026-04-24 | dependabot[bot] | 1f, +2/−2 | Bump the kotlin-ksp group with 2 updates (#6524) | Excluded: Dependency bump; Kotlin/KSP versions only. iOS uses own dependency management. |
+| [x] | `99a4268831` | 2026-04-24 | dependabot[bot] | 1f, +1/−1 | Bump com.android.application from 9.1.1 to 9.2.0 (#6517) | Excluded: Dependabot dependency bump; iOS has its own dependency management |
+| [x] | `6d6f67321a` | 2026-04-24 | dependabot[bot] | 3f, +11/−21 | Bump androidx.compose:compose-bom from 2026.03.01 to 2026.04.01 (#6521) | Excluded: Dependency bump; code change is Android Compose LocalLocale API adaptation only, behavior identical (manually verified). |
+| [x] | `b1dab4139e` | 2026-04-27 | translatewiki.net | 18f, +389/−10 | Localisation updates from https://translatewiki.net. (#6532) | Excluded: Localization sync; iOS has own translatewiki pipeline |
+| [ ] | `e5652ed35b` | 2026-04-27 | Dmitry Brant | 1f, +10/−0 | TestKitchen: Flush events periodically, not just when closing activity. (#6535) | Candidate: iOS has TestKitchen (WMFTestKitchen, TestKitchenAdapter.swift); port periodic 30s event-queue flush instead of flushing only on screen close. |
+| [ ] | `52102be0fa` | 2026-04-27 | William Rai | 64f, +4060/−24 | [Feature branch] Reading challenge widget (#6367) | Candidate: New Reading Challenge widget feature; iOS has a parallel implementation needing parity (streak logic, onboarding, reward dialog, analytics). |
+| [x] | `121aead5ce` | 2026-04-27 | Cooltey Feng | 1f, +1/−1 | Bump versionCode. (#6536) | Excluded: versionCode bump only; iOS has its own versioning system |
+| [x] | `fab8dc862a` | 2026-04-28 | dependabot[bot] | 1f, +1/−1 | Bump androidx.compose.ui:ui-graphics from 1.10.5 to 1.11.0 (#6539) | Excluded: Dependency version bump; iOS has independent dependency management |
+| [ ] | `b378a889fd` | 2026-04-28 | William Rai | 3f, +109/−78 | [Reading Challenge Widget] Widget Size Optimization Using percentage layout (#6541) | Candidate: User-visible Reading Challenge widget layout/mascot sizing tweaks; iOS has this widget, so verify/match sizing behavior across iOS widget families. |
+| [x] | `356653f6da` | 2026-04-28 | Cooltey Feng | 1f, +1/−1 | Bump versionCode. (#6543) | Excluded: Version code bump only; iOS has separate versioning scheme |
+| [x] | `a26078813e` | 2026-04-30 | translatewiki.net | 10f, +190/−6 | Localisation updates from https://translatewiki.net. (#6548) | Excluded: Localization sync from translatewiki.net; iOS has own translation pipeline |
+| [ ] | `36c5590720` | 2026-04-30 | William Rai | 7f, +279/−107 | [Reading Challenge Widget] Fixes missing behavior logic (#6544) | Candidate: Reading Challenge Widget streak/end-date behavior fixes; iOS has this widget, so port streak persistence, end-date inclusivity, and concluded-state logic. |
+| [ ] | `3b438fd1da` | 2026-04-30 | Cooltey Feng | 1f, +38/−29 | [ReadingChallenge] Fix: make content scrollable if the text size is too large (#6547) | Candidate: Reading Challenge widget exists on iOS; verify large text sizes don't clip widget content and adapt layout similarly. |
+| [ ] | `09ec2aafff` | 2026-04-30 | Cooltey Feng | 6f, +50/−18 | [ReadingChallenge] Fix: tap on join challenge should always show the prompt (#6545) | Candidate: iOS has Reading Challenge widget; verify tapping not-enrolled widget always opens join prompt, matching this behavior fix. |
+| [x] | `4c7555162d` | 2026-04-30 | Cooltey Feng | 1f, +1/−1 | Bump versionCode. (#6550) | Excluded: versionCode bump; iOS has its own versioning system |
+| [x] | `54f9b3b3e9` | 2026-05-01 | Dmitry Brant | 158f, +7048/−0 | Add static Topics translations. (#6549) | Excluded: Rule A: localization sync adding static Topics translation XML resources and a string-generation script; no product behavior change. |
+| [ ] | `f37f2a796b` | 2026-05-01 | Dmitry Brant | 1f, +210/−0 | Introduce Topics list for general use. (#6552) | Candidate: Adds article-topics taxonomy used by new in-window feed personalization; iOS would need equivalent topics list for interest selection. |
+| [ ] | `4db3feffe3` | 2026-05-01 | Dmitry Brant | 1f, +81/−0 | Introduce composable for fading-in AsyncImage. (#6551) | Candidate: User-visible polish: images fade in only when loading is slow; iOS feed image views could adopt equivalent conditional fade-in behavior. |
+| [x] | `7f54a97dd8` | 2026-05-01 | William Rai | 2f, +30/−25 | [Reading Challenge Widget] Fix mascot disappearing (#6554) | Excluded: Rule B: Android Glance widget layout bug fix (mascot sizing math); iOS widget has independent SwiftUI layout, no product-behavior change. |
+| [x] | `45b0254058` | 2026-05-04 | translatewiki.net | 5f, +213/−12 | Localisation updates from https://translatewiki.net. (#6555) | Excluded: Localization sync only; iOS has own translatewiki pipeline |
+| [x] | `eb5445a922` | 2026-05-04 | Cooltey Feng | 1f, +1/−1 | Bump versionCode. (#6556) | Excluded: versionCode bump only; iOS has separate versioning scheme |
+| [x] | `d5ee543659` | 2026-05-05 | dependabot[bot] | 1f, +1/−1 | Bump com.android.application from 9.2.0 to 9.2.1 (#6558) | Excluded: Gradle dependency bump; iOS has separate dependency management |
+| [x] | `6e43ec8bd6` | 2026-05-06 | dependabot[bot] | 4f, +14/−23 | Bump gradle-wrapper from 9.4.1 to 9.5.0 (#6540) | Excluded: Gradle wrapper dependency bump; iOS uses different build system |
+| [x] | `cfd2673de8` | 2026-05-06 | dependabot[bot] | 1f, +1/−1 | Bump androidx.paging:paging-runtime-ktx from 3.4.2 to 3.5.0 (#6560) | Excluded: Dependabot dependency bump; iOS has own dependency management |
+| [x] | `d296b7efbb` | 2026-05-06 | dependabot[bot] | 1f, +1/−1 | Bump androidx.paging:paging-compose from 3.4.2 to 3.5.0 (#6562) | Excluded: Dependency version bump (androidx.paging:paging-compose); iOS has separate dependency management |
+| [x] | `da70859dd6` | 2026-05-06 | dependabot[bot] | 1f, +1/−1 | Bump androidx.compose:compose-bom from 2026.04.01 to 2026.05.00 (#6561) | Excluded: Dependency version bump in gradle/libs.versions.toml; iOS has own dependency management |
+| [x] | `81c63185ad` | 2026-05-06 | dependabot[bot] | 1f, +1/−1 | Bump androidx.compose.ui:ui-graphics from 1.11.0 to 1.11.1 (#6563) | Excluded: Dependency version bump; iOS has separate dependency management |
+| [ ] | `198531f0c5` | 2026-05-06 | William Rai | 1f, +1/−0 | - adds instrumentation for ChallengeRemoved state (#6567) | Candidate: Adds challenge_removed analytics heartbeat for Reading Challenge widget; iOS has the same widget and should log this state too. |
+| [ ] | `05392ea39b` | 2026-05-06 | William Rai | 1f, +1/−0 | Remove Notification View from Explore Feed when user logs out (#6566) | Candidate: User-facing fix: hide Explore notifications bell on logout. iOS Explore also has a notifications button; verify it refreshes on logout. |
+| [x] | `f730d59705` | 2026-05-06 | Cooltey Feng | 1f, +1/−1 | Bump versionCode. (#6569) | Excluded: versionCode bump; iOS has own versioning system |
+| [x] | `07dd3fd517` | 2026-05-07 | translatewiki.net | 2f, +76/−7 | Localisation updates from https://translatewiki.net. (#6572) | Excluded: Localization sync; iOS has own translatewiki pipeline |
+| [ ] | `4a3e1357d7` | 2026-05-07 | Cooltey Feng | 2f, +6/−0 | Fix: use legacy zh-classical as the subdomain instead of lzh (#6571) | Candidate: Language-code fix mapping lzh to legacy zh-classical subdomain; iOS supports Classical Chinese and may need the same mapping. |
+| [x] | `2bb026367d` | 2026-05-07 | Dmitry Brant | 4f, +11/−11 | Design tweaks to Dot pager indicators. (#6570) | Excluded: Rule B: cosmetic spacing/size tweaks to Android's custom dot pager indicators; iOS uses native UIPageControl with platform-standard styling. |
+| [ ] | `2f95dddb34` | 2026-05-08 | Uwe Martin | 1f, +3/−1 | Using higher contrast text background color when in black or dark mode. (#6531) | Candidate: User-visible diff highlight contrast tweak for dark themes; iOS has a diff viewer and could apply similar contrast boost. |
+| [x] | `99aa556e88` | 2026-05-08 | Cooltey Feng | 1f, +5/−35 | Remove migration code and fix possible error in the WikiGames (#6574) | Excluded: Rule B: removes Android-only Prefs-to-Room migration code and guards a migration parse crash; no product behavior relevant to iOS. |
+| [ ] | `c46e647f55` | 2026-05-08 | Dmitry Brant | 7f, +30/−18 | Make ReadingLists correctly use remote Create and Modify time. (#6575) | Candidate: Reading list sync should use remote created/updated timestamps for lists and pages; iOS sync may need the same timestamp handling. |
+| [x] | `b88c6a672e` | 2026-05-11 | translatewiki.net | 10f, +229/−31 | Localisation updates from https://translatewiki.net. (#6579) | Excluded: Localization sync; iOS has own translatewiki pipeline |
+| [x] | `996ad8592f` | 2026-05-11 | Dmitry Brant | 1f, +3/−3 | Strip style tags when displaying Wiktionary definitions. (#6580) | Excluded: No-backfill: Wiktionary definitions dialog is a pre-window Android-only feature; iOS has no Wiktionary definition feature. |
+| [x] | `40876929c5` | 2026-05-12 | Cooltey Feng | 1f, +1/−1 | Bump versionCode. (#6584) | Excluded: versionCode bump; iOS has independent versioning |
+| [x] | `684d2bc170` | 2026-05-12 | Stefan Sundin | 3f, +5/−1 | Configure `android:windowSplashScreenBackground` to avoid white flash when the app opens in dark mode. (#6577) | Excluded: Rule B: Android 12 windowSplashScreenBackground theming fix for dark-mode splash flash; iOS launch screens handle dark mode natively. |
+| [x] | `7327ad2d0e` | 2026-05-13 | dependabot[bot] | 1f, +1/−1 | Bump gradle-wrapper from 9.5.0 to 9.5.1 (#6585) | Excluded: Gradle wrapper version bump; Android build tool only, no iOS relevance |
+| [ ] | `a3ac44de89` | 2026-05-13 | Dmitry Brant | 2f, +114/−0 | Strings for Home Feed. (#6586) | Candidate: New user-facing copy for Home Feed (Explore rename, tabs, onboarding) introduced in window; iOS needs equivalent strings when porting the feature. |
+| [ ] | `abfb3f82e0` | 2026-05-13 | William Rai | 2f, +16/−6 | Additional strings for the Home feed (#6587) | Candidate: New user-facing copy for Home feed settings modules; feature introduced in-window, so iOS port needs equivalent strings. |
+| [x] | `2b65f37182` | 2026-05-13 | Gyrandola | 1f, +1/−1 | Fix: increases search widget medium-size threshold (#6522) | Excluded: Rule B: Android-only RemoteViews size threshold fix for search widget rendering on Android 12+; no behavior relevant to iOS WidgetKit. |
+| [ ] | `29e8261693` | 2026-05-13 | Cooltey Feng | 10f, +90/−37 | Instrumentation for app_open events (#6576) | Candidate: Cross-platform analytics: iOS should emit TestKitchen app_open events with widget, notification, shortcut, and background sources; iOS TestKitchen exists in window. |
+| [ ] | `64da8320a4` | 2026-05-13 | Cooltey Feng | 2f, +17/−13 | Add strings for swipe-to-explore prompt in the new explore feed (#6589) | Candidate: Adds user-facing swipe-to-explore prompt strings for the new explore feed; iOS would need equivalent gesture-education prompt copy. |
+| [x] | `f1d1a94f86` | 2026-05-14 | Cooltey Feng | 2f, +2/−2 | Fix: add the correct contentDescription to the close icon in tab items (#6593) | Excluded: Rule B: fixes Android-only XML contentDescription accessibility labels; an Android resource bug with no product-behavior change to port. |
+| [ ] | `365bd9be6f` | 2026-05-14 | William Rai | 2f, +8/−0 | - strings for empty state (#6594) | Candidate: Adds empty-state copy for new in-window Home feed tabs; iOS needs equivalent empty-state UI strings when porting the feed redesign. |
+| [x] | `faea574716` | 2026-05-14 | dependabot[bot] | 1f, +1/−1 | Bump com.google.devtools.ksp from 2.3.7 to 2.3.8 in the kotlin-ksp group (#6588) | Excluded: Dependency bump (KSP 2.3.7→2.3.8); Android-only build tool, iOS has own dependencies |
+| [x] | `027acdf6b3` | 2026-05-14 | dependabot[bot] | 1f, +1/−1 | Bump com.google.android.material:material from 1.13.0 to 1.14.0 (#6590) | Excluded: Dependabot dependency bump (material 1.13.0 to 1.14.0 in Gradle); iOS has independent dependency management |
+| [ ] | `98a3120b79` | 2026-05-15 | William Rai | 1f, +1/−1 | - string update (#6600) | Candidate: User-facing copy fix quoting "Community" in Home Feed settings subtitle; feature introduced inside sync window, so iOS should match wording. |
+| [x] | `d9630fab94` | 2026-05-18 | translatewiki.net | 22f, +924/−120 | Localisation updates from https://translatewiki.net. (#6602) | Excluded: Localization sync from translatewiki; iOS has own translation pipeline |
+| [ ] | `836543c9f7` | 2026-05-18 | William Rai | 2f, +10/−0 | [Explore Feed] For you empty state strings (#6603) | Candidate: Adds For You feed empty-state copy; feed redesign introduced in window, so iOS needs equivalent empty-state strings/UI. |
+| [x] | `bf13277f15` | 2026-05-18 | Cooltey Feng | 1f, +30/−8 | Update AGENTS.md (#6564) | Excluded: Documentation-only update to AGENTS.md agent instructions; no product behavior. Exclusion rule A (docs). |
+| [x] | `51ea875719` | 2026-05-19 | Dmitry Brant | 1f, +6/−0 | Add unit test for transforming thumbnail URLs with URL parameters. (#6605) | Excluded: Rule A: adds only an Android unit test for thumbnail URL transformation; no product behavior change. |
+| [ ] | `e164df3609` | 2026-05-19 | William Rai | 2f, +18/−0 | - strings for what's driving your feed setting (#6608) | Candidate: New user-facing copy for Home Feed "For You" feed-configuration settings, a feature introduced in this window; iOS port needs equivalent strings. |
+| [ ] | `19668e0979` | 2026-05-19 | Dmitry Brant | 2f, +2/−9 | Test kitchen: Limit max number of languages in performerData. (#6609) | Candidate: iOS Test Kitchen still truncates languageGroups at 255 chars; port the take-10-languages limit to TestKitchenAdapter and ContextController. |
+| [x] | `efeefd187c` | 2026-05-20 | dependabot[bot] | 1f, +1/−1 | Bump androidx.compose.ui:ui-graphics from 1.11.1 to 1.11.2 (#6611) | Excluded: Dependabot dependency bump; iOS has separate dependency management |
+| [x] | `89ae7913a7` | 2026-05-20 | dependabot[bot] | 1f, +1/−1 | Bump androidx.compose:compose-bom from 2026.05.00 to 2026.05.01 (#6612) | Excluded: Dependabot dependency bump; iOS has independent dependency management |
+| [x] | `016fff831f` | 2026-05-21 | translatewiki.net | 16f, +513/−30 | Localisation updates from https://translatewiki.net. (#6617) | Excluded: Localization sync; iOS has own translatewiki pipeline |
+| [ ] | `20cc80172d` | 2026-05-21 | Cooltey Feng | 144f, +11011/−560 | [Feature branch] Explore Feed Redesign (#6446) | Candidate: Major Explore Feed redesign with new onboarding and home feed; iOS has an Explore feed, so this user-facing redesign should be ported. |
+| [x] | `d526598ac6` | 2026-05-21 | Cooltey Feng | 1f, +1/−1 | Bump versionCode. (#6620) | Excluded: versionCode bump only; iOS has separate versioning scheme |
+| [ ] | `50424247f4` | 2026-05-21 | Cooltey Feng | 4f, +8/−3 | Fix: update the homeLanguage during onboarding and undo the changes in updateSelectedLanguageIfNeeded (#6621) | Candidate: Home feed language-selection bug fix; feature introduced in window, so iOS port should persist onboarding language choice and avoid resetting feed language. |
+| [x] | `8cbc88d004` | 2026-05-21 | Cooltey Feng | 1f, +1/−1 | Bump versionCode. (#6622) | Excluded: versionCode bump only; iOS has separate versioning |
+| [ ] | `4260ebcfce` | 2026-05-22 | Dmitry Brant | 1f, +9/−20 | Show announcements by allowlist, not denylist. (#6624) | Candidate: Behavior change: announcements only shown over main feed or article screens (allowlist). iOS announcement presentation gating could adopt the same rule. |
+| [ ] | `8268b4a251` | 2026-05-22 | William Rai | 1f, +1/−1 | - string update (#6625) | Candidate: Updates user-visible Community feed empty-state copy; Home Feed redesign was introduced within the sync window, so iOS should match the new wording. |
+| [ ] | `f74f200812` | 2026-05-22 | Cooltey Feng | 1f, +18/−4 | Fix: refresh the Feed content when the language is inconsistent (#6623) | Candidate: Home Feed redesign was introduced in-window; iOS port should refresh For You/Community feed when app language changes instead of showing stale content. |
+| [ ] | `29604f7c71` | 2026-05-22 | Dmitry Brant | 3f, +34/−36 | Home feed: Tweak/improve Continue Reading logic. (#6626) | Candidate: Product logic change to home feed Continue Reading: use most recent saved pages, batch metadata fetch, module reorder; feature introduced in window. |
+| [x] | `d827c1b03c` | 2026-05-26 | translatewiki.net | 84f, +766/−442 | Localisation updates from https://translatewiki.net. (#6633) | Excluded: Localization sync from translatewiki; iOS uses own translation pipeline |
+| [ ] | `d11edd58e3` | 2026-05-26 | Cooltey Feng | 1f, +14/−7 | Fix: when the tab icon or notification icon appears, the toolbar moves (#6630) | Candidate: Home toolbar (feed redesign, added in window) fix: reserve space so toolbar doesn't shift when tab/notification icons appear; iOS port should match. |
+| [ ] | `36aab1c3fd` | 2026-05-26 | Dmitry Brant | 2f, +336/−319 | Home feed: properly use RTL or LTR layout based on language. (#6634) | Candidate: User-visible fix: home feed and interest selection should use RTL/LTR per feed language; feature introduced in-window, iOS port needed. |
+| [x] | `e97b3b6af3` | 2026-05-26 | Cooltey Feng | 1f, +1/−0 | Fix: image caption and license should be visible by default (#6635) | Excluded: Rule B: one-line fix for Android-only view visibility regression in gallery overlay; iOS gallery implementation already shows caption/license. |
+| [x] | `6d890ec0a3` | 2026-05-26 | Cooltey Feng | 2f, +32/−5 | Fix: use LaunchedEffect to resolve the overflow animation issue on (#6629) | Excluded: Rule B: Jetpack Compose DropdownMenu dismiss-animation workaround in feed overflow menu; Android-framework-specific fix with no behavior relevant to iOS. |
+| [ ] | `7311d3d1c3` | 2026-05-26 | Hakan | 2f, +144/−6 | Fix nested display:none span handling in CustomHtmlParser (#6631) | Candidate: User-facing fix: strip nested display:none spans when rendering HTML natively (T426910 garbled citations); iOS HTML parsing shows no such handling, verify and fix. |
+| [ ] | `b7ac078dad` | 2026-05-26 | Dmitry Brant | 2f, +8/−4 | Improve display of Blocked messages, and make snackbar selectable. (#6636) | Candidate: User-facing tweak to blocked-error messages and copyable long error toasts; iOS has blocked-message handling and could adopt similar display improvements. |
+| [x] | `ab19004b73` | 2026-05-26 | Cooltey Feng | 1f, +1/−1 | Bump versionCode. (#6638) | Excluded: versionCode bump only; iOS has own versioning system |
+| [x] | `49381781fa` | 2026-05-27 | dependabot[bot] | 1f, +1/−1 | Bump com.google.devtools.ksp from 2.3.8 to 2.3.9 in the kotlin-ksp group (#6639) | Excluded: KSP dependency bump in gradle/libs.versions.toml; iOS has own dependency management |
+| [x] | `026dbd6c8b` | 2026-05-27 | William Rai | 2f, +22/−29 | - multiples recomposition fixes in pageIndicator and FadeAsyncImage (#6637) | Excluded: Rule B: Jetpack Compose recomposition/performance fix with identical visual behavior; Android-framework-specific, no product change for iOS. |
+| [ ] | `c40da836be` | 2026-05-27 | Dmitry Brant | 1f, +1/−2 | Home feed: set funnel name when initializing. (#6641) | Candidate: Home feed TestKitchen instrument should start home_feed funnel at initialization; feature introduced in window and iOS uses TestKitchen funnels. |
+| [x] | `480a19f0aa` | 2026-05-27 | William Rai | 5f, +1463/−1337 | - splits home fragment to dedicated composables. ForYouContentTab.kt, CommunityContentTab.kt, HomeScreen.kt and shared FeedComponents.kt. (#6640) | Excluded: Rule B: pure file-split refactor of HomeFragment into separate Compose files; verified code identical except imports, no behavior change. |
+| [x] | `1b52136556` | 2026-05-28 | translatewiki.net | 13f, +353/−48 | Localisation updates from https://translatewiki.net. (#6644) | Excluded: Localization sync only; iOS has its own translatewiki pipeline |
+| [x] | `0c4d8a2e33` | 2026-05-28 | Cooltey Feng | 1f, +1/−1 | Bump versionCode. (#6645) | Excluded: versionCode bump; iOS has separate versioning system |
+| [ ] | `e690c486af` | 2026-05-29 | Cooltey Feng | 1f, +1/−1 | Fix: avoid showing duplicated continue reading articles in Home feed. (#6646) | Candidate: User-facing fix: dedupe Continue Reading items by title in Home feed, a feature introduced within the sync window; iOS should dedupe likewise. |
+| [x] | `fbbc8c6f57` | 2026-06-01 | translatewiki.net | 12f, +725/−26 | Localisation updates from https://translatewiki.net. (#6651) | Excluded: Localization sync; iOS has own translatewiki pipeline |
+| [ ] | `052d4fff08` | 2026-06-01 | William Rai | 2f, +17/−24 | - reloads reactively when language and tab changes (#6628) | Candidate: Home feed redesign (introduced in window) should reload For You/Community content reactively on language or tab change; iOS port needs same behavior. |
+| [x] | `7d405c6736` | 2026-06-01 | Brooke Vibber | 1f, +4/−3 | Update address for bvibber (#6653) | Excluded: Rule A: .mailmap contributor metadata update only; no code or product behavior change. |
+| [x] | `2cbae2b837` | 2026-06-01 | Cooltey Feng | 133f, +77/−6957 | Clean up Explore feed codes (#6649) | Excluded: Rule B: deletes legacy View-based Explore feed code after Compose migration; pure Android dead-code cleanup, no behavior change. |
+| [x] | `08116872ab` | 2026-06-01 | Dmitry Brant | 1f, +2/−2 | Fix potential crash when displaying overflow menu in Notifications. (#6652) | Excluded: Rule B: Android-only crash fix for misordered getString arguments in notifications overflow view; no product-behavior change for iOS. |
+| [x] | `e422eb7a01` | 2026-06-02 | Dmitry Brant | 14f, +39/−165 | Further cleanup of old Explore feed, and fixes. (#6654) | Excluded: Rule B: Android-only dead-code cleanup of old Explore feed classes and tests; identical user-visible behavior, nothing to port. |
+| [ ] | `e98c308a68` | 2026-06-02 | Dmitry Brant | 1f, +60/−0 | Randomizer: enable shake-to-shuffle. (#6655) | Candidate: Adds shake-to-shuffle with haptic to Randomizer; iOS has RandomArticleViewController and could add motionShake handling for the same behavior. |
+| [ ] | `b5145a8c2a` | 2026-06-02 | William Rai | 7f, +265/−115 | [Explore Feed] For you content end of feed (#6642) | Candidate: Adds end-of-feed view and loop-scroll to new For You feed (introduced in window); iOS feed redesign would need the same. |
+| [x] | `440b6555bb` | 2026-06-02 | William Rai | 1f, +1/−1 | Bump versionCode. (#6657) | Excluded: versionCode bump only; iOS has independent versioning |
+| [x] | `c2c5fc3c9a` | 2026-06-04 | translatewiki.net | 9f, +39/−14 | Localisation updates from https://translatewiki.net. (#6661) | Excluded: Localization sync; iOS has own translatewiki pipeline |
+| [x] | `df875dc049` | 2026-06-04 | Dmitry Brant | 1f, +91/−82 | Possible fix for T395597 (#6659) | Excluded: Rule B: Android-only coroutine job cancellation and Fragment lifecycle fix for page-load race condition; no product behavior change. |
+| [x] | `4f936f143a` | 2026-06-04 | William Rai | 26f, +45/−881 | [Explore feed] Android instrumented test cleanup (#6656) | Excluded: Rule A: Android instrumented test cleanup plus deletion of one unused class; no product behavior change. |
+| [ ] | `da68484428` | 2026-06-04 | Tyler Heck | 20f, +289/−80 | T427722: Update Launcher Icon and Splash Screen (#6650) | Candidate: Branding refresh: new launcher icon artwork and animated splash screen; iOS app icon and launch screen would need matching visual update. |
+| [ ] | `09917ef4b2` | 2026-06-04 | William Rai | 6f, +100/−100 | [Explore Feed] reactive hidden card using data store  (#6658) | Candidate: Feed redesign introduced within window; iOS port: persist hidden feed cards reactively so hide/undo updates both Community and For You tabs. |
+| [ ] | `3a901fcf6e` | 2026-06-05 | Dmitry Brant | 12f, +346/−3 | Home Feed: Did You Know (#6662) | Candidate: New Did You Know module and detail screen for the Home Feed; iOS would add the same feed module using its existing DYK fetcher. |
+| [x] | `171fa6650c` | 2026-06-05 | Dmitry Brant | 11f, +71/−191 | Introduce preview conveniences for PageTitle and PageSummary. (#6664) | Excluded: Rule B: Compose @Preview mock-data conveniences only; developer tooling refactor with no user-visible behavior change. |
+| [ ] | `9de3822311` | 2026-06-05 | Dmitry Brant | 10f, +223/−15 | Home Feed: Random article (#6663) | Candidate: Adds Random article module to new Home Feed (introduced in window); iOS would add matching random-article feed card and setting. |
+| [x] | `ae1c137422` | 2026-06-08 | translatewiki.net | 16f, +126/−19 | Localisation updates from https://translatewiki.net. (#6665) | Excluded: Localization sync only; iOS has own translatewiki pipeline |
+| [ ] | `ac1fc58efd` | 2026-06-08 | William Rai | 17f, +528/−17 | [Explore Feed] Places of Interest Module (#6648) | Candidate: New Places of Interest home-feed module with location prompt and settings; feed redesign originated in window, so iOS should add equivalent module. |
+| [x] | `dd6b000088` | 2026-06-08 | William Rai | 1f, +1/−1 | Bump versionCode. (#6666) | Excluded: versionCode bump only; iOS has independent versioning scheme |
+| [x] | `f59bc9aafe` | 2026-06-09 | Kevin Galligan | 1f, +10/−0 | sync plan | Excluded: Rule A: docs-only commit adding APP-SYNC.md sync-workflow notes; no product or code behavior change. |
