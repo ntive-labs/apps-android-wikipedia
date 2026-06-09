@@ -10,6 +10,7 @@ import org.wikipedia.Constants
 import org.wikipedia.WikipediaApp
 import org.wikipedia.json.UriSerializer
 import org.wikipedia.language.AppLanguageLookUpTable
+import org.wikipedia.settings.Prefs
 import org.wikipedia.util.UriUtil
 
 /**
@@ -147,10 +148,9 @@ data class WikiSite(
 
         fun forLanguageCode(languageCode: String): WikiSite {
             val uri = ensureScheme(DEFAULT_BASE_URL!!.toUri())
-            return WikiSite(
-                (if (languageCode.isEmpty()) "" else languageCodeToSubdomain(languageCode) + ".") + uri.authority,
-                languageCode
-            )
+            val subdomain = if (languageCode.isEmpty() || !Prefs.mediaWikiBaseUriSupportsLangCode) ""
+            else languageCodeToSubdomain(languageCode) + "."
+            return WikiSite("${uri.scheme}://$subdomain${uri.authority}", languageCode)
         }
 
         fun normalizeLanguageCode(languageCode: String): String {
