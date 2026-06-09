@@ -113,3 +113,71 @@ the data you expect, check that log first to see what the app actually asked for
   in mocked flows.
 - The dev build auto-enrolls in active experiments (e.g. hybrid search), which
   can add surprise onboarding screens — keep the clean-launch seed current.
+
+---
+
+# iOS app (`../wikipedia-ios`)
+
+The iOS app already ships equivalent — and in places stronger — test-parameter
+infrastructure. For Maestro flows against iOS, **reuse it; do not build new
+hooks**. The mechanisms differ from Android, so flows are per-platform, but
+mirror their names, tags, and assertions (e.g. a `mock-search.yaml` on each
+side verifying the same user-visible behavior).
+
+## What exists in the iOS repo
+
+| Piece | Location | Purpose |
+|---|---|---|
+| Launch-argument keys | `WikipediaUITests/Config/UITestLaunchArgument.swift` | `-WMF*` test parameters (onboarding, tips, announcements, theme, language, HTTP profile) |
+| UITest config | `WikipediaUITests/Config/UITestConfiguration.swift` | The canonical deterministic-launch defaults used by XCUITests |
+| Network fixtures | `Wikipedia/Code/TestNetworkFixtures/` | In-process `URLProtocol` interception with a fixture store |
+| HTTP profiles | `TestHTTPClientProfile.swift` (`e2e`, `fixture-strict`) | Selected via `-WMFTestHTTPClientProfile`; `fixture-strict` fails unfixtured requests |
+| Env switching | `WMF Framework/Configuration.swift` (`WMF_LOCAL` / `WMF_STAGING`) | Compile-time endpoint environments, the analog of Android flavor gating |
+
+## State seeding: UserDefaults argument domain
+
+The `-WMF*` keys are passed as paired launch arguments (`["-Key", "value"]`,
+see `WikipediaAppRobot.swift`). iOS automatically surfaces `-Key value` launch
+arguments as the highest-precedence UserDefaults layer — **per-launch and
+ephemeral**. This replaces the entire Android broadcast-receiver/seed/force-stop
+dance: no app-side receiver, nothing persisted, nothing to clean up.
+
+- Pass them from Maestro via `launchApp: arguments:`. **Verify once** that
+  Maestro's iOS argv encoding delivers the paired `-Key value` form (probe with
+  a known flag like `-WMFHideTipsForTesting`). If it doesn't, launch via a
+  wrapper script instead — `xcrun simctl launch <udid> org.wikimedia.wikipedia
+  -Key value ...` — and have the flow attach with a plain `launchApp`
+  (no `clearState` / no stop), mirroring `seed-prefs.sh`.
+- For state the argument domain can't reach (custom-suite defaults, files,
+  Core Data): `xcrun simctl spawn <udid> defaults write org.wikimedia.wikipedia
+  <key> <value>` with the app terminated — the simctl analog of our broadcast
+  seeding. Use sparingly; prefer extending `UITestLaunchArgument`.
+
+## Network mocking: in-process fixtures, no server
+
+Launch with `-WMFTestHTTPClientProfile fixture-strict` and add fixtures to the
+`TestNetworkFixtures` store for new scenarios. Interception is in-process, so
+there is no ATS/cleartext config and no host-loopback address to manage —
+the iOS counterpart of both our Python fixture server and the dev
+`network_security_config.xml`. Only use an external server if cross-process
+realism matters; simulators share the Mac's network, so it would just be
+`localhost` plus an `NSAllowsLocalNetworking` ATS exception.
+
+## Clean-launch argument set
+
+Define the iOS twin of the Android seed JSON from the `UITestConfiguration`
+defaults: onboarding completed (`-DidShowOnboarding5.3`), tips hidden,
+activity-tab/games/reading-challenge announcements suppressed, fixed theme and
+language. The iOS team has already solved the same "gating screens" problem —
+when a new promo blocks a flow, extend `UITestLaunchArgument` (and
+`UITestConfiguration`) rather than inventing a one-off.
+
+## Adding a new mock situation on iOS — checklist
+
+1. **Is it already a launch argument?** Check `UITestLaunchArgument.swift`;
+   pass it from the flow. Done — no app code change.
+2. **Is it an API response?** Add a fixture to `TestNetworkFixtures` and run
+   under `fixture-strict`.
+3. **Otherwise** add a new `-WMF*` launch argument read at the existing seam,
+   runtime-gated and `#if DEBUG` where possible — same altitude rule as
+   Android: hooks at seams, not scattered through feature code.
