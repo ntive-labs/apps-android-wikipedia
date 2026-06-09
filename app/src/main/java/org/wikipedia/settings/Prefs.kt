@@ -174,6 +174,9 @@ object Prefs {
     val mediaWikiBaseUriSupportsLangCode
         get() = PrefsIoUtil.getBoolean(R.string.preference_key_mediawiki_base_uri_supports_lang_code, true)
 
+    val semanticSearchBaseUrl
+        get() = PrefsIoUtil.getString(R.string.preference_key_semantic_search_base_uri, "")!!
+
     var eventPlatformIntakeUriOverride
         get() = PrefsIoUtil.getString(R.string.preference_key_event_platform_intake_base_uri, "")
         set(value) = PrefsIoUtil.setString(R.string.preference_key_event_platform_intake_base_uri, value)

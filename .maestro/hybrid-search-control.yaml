@@ -1,0 +1,24 @@
+appId: org.wikipedia.dev
+name: Hybrid search control group sees standard search only
+tags:
+  - mock
+  - hybrid-search
+---
+# Prerequisites (handled by run-hybrid-search.sh):
+#   - fixture server on host port 8081
+#   - state seeded: ab_test_hybridSearch=0 (control), hybrid onboarding NOT shown,
+#     base URIs pointed at the fixture server
+# Control users must get no onboarding and the standard search experience.
+- launchApp
+- tapOn:
+    id: ".*:id/nav_tab_search"
+- assertVisible: "Search Wikipedia"
+- tapOn: "Search Wikipedia"
+# Control users go straight to search — no onboarding interception.
+- assertNotVisible: "A new way to search"
+- inputText: "maestro"
+- extendedWaitUntil:
+    visible: "Maestro Mock Article"
+    timeout: 10000
+- assertVisible: "Result served by the local fixture server"
+- takeScreenshot: .maestro/screenshots/android-hybrid-control-standard-results

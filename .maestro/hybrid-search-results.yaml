@@ -1,0 +1,35 @@
+appId: org.wikipedia.dev
+name: Hybrid search results, semantic-first group (experiment group C)
+tags:
+  - mock
+  - hybrid-search
+---
+# Prerequisites (handled by run-hybrid-search.sh):
+#   - fixture server on host port 8081
+#   - state seeded: ab_test_hybridSearch=2 (semanticLexical), onboarding shown,
+#     hybrid search enabled, base URIs pointed at the fixture server
+# Do NOT use clearState here — it would wipe the seeded preferences.
+- launchApp
+- tapOn:
+    id: ".*:id/nav_tab_search"
+# Experiment-group placeholder text replaces "Search Wikipedia" on the search card.
+- assertVisible: "Search or ask anything"
+- takeScreenshot: .maestro/screenshots/android-hybrid-search-hint
+- tapOn: "Search or ask anything"
+- inputText: "When was Pluto unlisted as a planet?"
+# While typing, the experiment group sees a title-only suggestion list.
+- extendedWaitUntil:
+    visible: "Maestro Mock Article"
+    timeout: 10000
+- takeScreenshot: .maestro/screenshots/android-hybrid-title-only-suggestions
+- pressKey: Enter
+# Group C = semantic cards first, lexical results below.
+- extendedWaitUntil:
+    visible: "Sourced from human generated Wikipedia articles"
+    timeout: 15000
+- assertVisible: "Rate this result"
+- assertVisible: "Pluto"
+- takeScreenshot: .maestro/screenshots/android-hybrid-results-semantic-first
+- tapOn: "Rate thumbs up"
+- assertVisible: "Rated"
+- takeScreenshot: .maestro/screenshots/android-hybrid-results-rated

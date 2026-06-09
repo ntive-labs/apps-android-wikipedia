@@ -1,0 +1,30 @@
+{
+  "batchcomplete": true,
+  "query": {
+    "pages": [
+      {
+        "pageid": 44469,
+        "ns": 0,
+        "title": "Pluto",
+        "description": "Dwarf planet in the outer Solar System",
+        "thumbnail": {
+          "source": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ef/Pluto_in_True_Color_-_High-Res.jpg/320px-Pluto_in_True_Color_-_High-Res.jpg",
+          "width": 320,
+          "height": 320
+        }
+      },
+      {
+        "pageid": 6235,
+        "ns": 0,
+        "title": "IAU definition of planet",
+        "description": "2006 formal definition of a planet"
+      },
+      {
+        "pageid": 73277,
+        "ns": 0,
+        "title": "Dwarf planet",
+        "description": "Small planetary-mass object orbiting the Sun"
+      }
+    ]
+  }
+}
