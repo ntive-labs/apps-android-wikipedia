@@ -27,6 +27,7 @@ import org.wikipedia.dataclient.ServiceFactory
 import org.wikipedia.dataclient.WikiSite
 import org.wikipedia.dataclient.mwapi.MwQueryResponse
 import org.wikipedia.page.PageTitle
+import org.wikipedia.settings.Prefs
 import org.wikipedia.util.StringUtil
 import org.wikipedia.util.UiState
 
@@ -56,7 +57,8 @@ class SearchResultsViewModel : ViewModel() {
 
     val getTestGroup get() = HybridSearchAbCTest().getGroupName()
 
-    private val semanticSearchService: SemanticSearchService = ServiceFactory[WikiSite(SemanticSearchService.BASE_URL), SemanticSearchService.BASE_URL, SemanticSearchService::class.java]
+    private val semanticSearchBaseUrl = Prefs.semanticSearchBaseUrl.ifEmpty { SemanticSearchService.BASE_URL }
+    private val semanticSearchService: SemanticSearchService = ServiceFactory[WikiSite(semanticSearchBaseUrl), semanticSearchBaseUrl, SemanticSearchService::class.java]
     val isHybridSearchExperimentOn get() = HybridSearchAbCTest().isHybridSearchEnabled(languageCode.value)
 
     var semanticResultsTitlesForEvent = ""

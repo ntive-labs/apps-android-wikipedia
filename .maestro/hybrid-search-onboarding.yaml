@@ -1,0 +1,32 @@
+appId: org.wikipedia.dev
+name: Hybrid search onboarding and example-query search (experiment group B)
+tags:
+  - mock
+  - hybrid-search
+---
+# Prerequisites (handled by run-hybrid-search.sh):
+#   - fixture server on host port 8081 (lexical + semantic + remote config routes)
+#   - state seeded: onboarding suppressed, ab_test_hybridSearch=1 (lexicalSemantic),
+#     hybridSearchOnboardingShown=false, base URIs pointed at the fixture server
+# Do NOT use clearState here — it would wipe the seeded preferences.
+- launchApp
+- tapOn:
+    id: ".*:id/nav_tab_search"
+# Opening search (via the search card) intercepts with the hybrid onboarding.
+- tapOn: "Search Wikipedia"
+- assertVisible: "A new way to search"
+- assertVisible: "Beta"
+- assertVisible: "Ask questions, get answers"
+- assertVisible: "Need inspiration?"
+- takeScreenshot: .maestro/screenshots/android-hybrid-onboarding
+- tapOn: "When was Pluto unlisted as a planet?"
+# Example query launches SearchActivity with the query and starts a hybrid search.
+- extendedWaitUntil:
+    visible: "Sourced from human generated Wikipedia articles"
+    timeout: 15000
+- takeScreenshot: .maestro/screenshots/android-hybrid-results-from-onboarding
+# Group B = lexical results first; scroll down to the semantic cards.
+- scrollUntilVisible:
+    element: "Rate this result"
+- assertVisible: "Pluto"
+- takeScreenshot: .maestro/screenshots/android-hybrid-results-semantic-cards

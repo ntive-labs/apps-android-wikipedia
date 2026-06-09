@@ -17,8 +17,11 @@ FIXTURE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # (url substring, fixture file) — first match wins.
 ROUTES = [
+    ("include_text=", "semantic_search_results.json"),
+    ("feed/configuration", "remote_config.json"),
     ("generator=prefixsearch", "search_results.json"),
     ("list=search", "search_results.json"),
+    ("prop=info", "semantic_page_info.json"),
 ]
 
 
