@@ -1,0 +1,37 @@
+appId: org.wikipedia.dev
+name: Launch smoke test
+tags:
+  - smoke
+---
+# Fresh-install launch: clear state so the initial onboarding always shows,
+# walk through it, and verify the main screen appears.
+- launchApp:
+    clearState: true
+
+# Onboarding page 1: welcome
+- assertVisible: "All the world's knowledge"
+- tapOn: "Forward"
+
+# Onboarding page 2: privacy
+- assertVisible: "Data & Privacy"
+- tapOn: "Forward"
+
+# Onboarding page 3: languages
+- assertVisible: "Read in more than 300 languages"
+- tapOn: "Forward"
+
+# Onboarding page 4: topics of interest (skippable)
+- assertVisible: "Follow your curiosity"
+- tapOn: "Skip"
+
+# Main screen: bottom navigation is present
+- assertVisible:
+    id: ".*:id/nav_tab_home"
+- assertVisible: "Saved"
+- assertVisible: "Search"
+- assertVisible: "More"
+
+# Home feed content loads (requires network)
+- extendedWaitUntil:
+    visible: "Featured article"
+    timeout: 20000
