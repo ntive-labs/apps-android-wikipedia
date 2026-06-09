@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+        <!-- Test-harness hook for seeding app state from adb. Dev flavor only. -->
+        <receiver
+            android:name="org.wikipedia.dev.TestSetupReceiver"
+            android:exported="true" />
+    </application>
+
+</manifest>
