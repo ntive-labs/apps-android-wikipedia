@@ -16,6 +16,10 @@ no-backfill rule: changes to a pre-window Android feature that doesn't exist on 
 rows remain unchecked and describe the likely iOS change; each still needs per-commit planning and
 execution. Triage was conservative: uncertain commits were kept as candidates.
 
+**Scope decision (2026-06-09):** Hybrid/semantic search IS in scope — the window anchor commit
+`af457ff7ae` is the commit that introduces it. All hybrid-search follow-up commits are candidates;
+the no-backfill rule does not apply to this feature.
+
 ## Commit checklist
 
 | Done | Commit | Date | Author | Size | Summary | Results |
@@ -49,10 +53,10 @@ execution. Triage was conservative: uncertain commits were kept as candidates.
 | [x] | `5f53119c03` | 2026-03-09 | translatewiki.net | 6f, +31/−8 | Localisation updates from https://translatewiki.net. (#6375) | Excluded: Localization sync; iOS has own translatewiki pipeline |
 | [ ] | `2d908c3384` | 2026-03-09 | Dmitry Brant | 15f, +152/−32 | Instrumentation: underpinnings for sending events to logging intake. (#6370) | Candidate: iOS could enrich ClientErrorFunnel to match: stack traces, error class, and automatic HTTP-failure logging to logging intake. |
 | [ ] | `6240fa0d02` | 2026-03-09 | Dmitry Brant | 6f, +49/−28 | Semantic search: update API, and enable for FR. (#6373) | Candidate: Hybrid/semantic search feature originated at window boundary commit; iOS would add semantic search API, FR language support, and x-search-id analytics. |
-| [x] | `6d0b3e0c4e` | 2026-03-09 | Dmitry Brant | 1f, +10/−10 | Hybrid search: French strings. (#6376) | Excluded: Rule A: French localization string updates only, no product behavior change. |
+| [ ] | `6d0b3e0c4e` | 2026-03-09 | Dmitry Brant | 1f, +10/−10 | Hybrid search: French strings. (#6376) | Candidate: French UI strings for hybrid search; iOS port needs equivalent localized content (re-included: hybrid search in scope). |
 | [x] | `80c5898f4e` | 2026-03-09 | Cooltey Feng | 1f, +1/−1 | Bump versionCode. (#6378) | Excluded: versionCode bump in app/build.gradle; iOS has its own versioning |
 | [ ] | `763158c976` | 2026-03-11 | Dmitry Brant | 1f, +8/−1 | Don't log HTTP errors for 320px thumbnail requests. (#6383) | Candidate: iOS has ClientErrorFunnel; may need same skip of client_error logging for 320px thumbnail HTTP failures (Commons rate-limit noise). |
-| [x] | `e95b52efc6` | 2026-03-11 | Cooltey Feng | 2f, +15/−3 | HybridSearch: French sample queries update (#6382) | Excluded: No-backfill rule: HybridSearch absent from iOS and introduced at window base af457ff7ae, before the sync window; only adds French sample queries. |
+| [ ] | `e95b52efc6` | 2026-03-11 | Cooltey Feng | 2f, +15/−3 | HybridSearch: French sample queries update (#6382) | Candidate: French sample queries for hybrid search onboarding; port with iOS hybrid search (re-included: hybrid search in scope). |
 | [ ] | `6c43d3fe3c` | 2026-03-11 | Dmitry Brant | 2f, +12/−4 | Apply User-agent header to MediaPlayer instances. (#6386) | Candidate: iOS AVPlayer media playback (e.g. pronunciation audio) lacks app User-Agent header; apply it via AVURLAsset HTTP header options. |
 | [ ] | `8b7b08008f` | 2026-03-11 | Dmitry Brant | 2f, +2/−2 | When matching system Dark theme, default to Dark theme instead of Black. (#6384) | Candidate: User-facing change: system dark mode defaults to Dark not Black; iOS has same Black default in NSUserDefaults+WMFExtensions.swift line 159. |
 | [x] | `bf9aa2a5f7` | 2026-03-11 | Cooltey Feng | 1f, +1/−1 | Bump versionCode. (#6385) | Excluded: versionCode bump only; iOS has its own versioning |
@@ -81,7 +85,7 @@ execution. Triage was conservative: uncertain commits were kept as candidates.
 | [ ] | `9ddfb7f727` | 2026-03-18 | Dmitry Brant | 1f, +3/−10 | Semantic search: fix/simplify progress bar logic. (#6409) | Candidate: Fixes loading-indicator behavior in hybrid/semantic search, a feature introduced at the sync window start; iOS port needs equivalent progress logic. |
 | [x] | `63ae0be906` | 2026-03-18 | William Rai | 1f, +1/−1 | - removes the extra padding between the Login button (#6413) | Excluded: Rule B: one-line Android Compose padding fix in games login button; cosmetic Android layout artifact, iOS layouts are independent. |
 | [x] | `73b3b6408a` | 2026-03-19 | translatewiki.net | 52f, +228/−283 | Localisation updates from https://translatewiki.net. (#6415) | Excluded: Localization sync from translatewiki.net; iOS has own pipeline |
-| [x] | `5be171920e` | 2026-03-19 | Dmitry Brant | 3f, +26/−26 | Semantic search: no longer stuff result lists into actionContext. (#6419) | Excluded: Rule C: tweaks hybrid/semantic search analytics; feature absent from iOS and introduced at window base af457ff7ae, outside the window. |
+| [ ] | `5be171920e` | 2026-03-19 | Dmitry Brant | 3f, +26/−26 | Semantic search: no longer stuff result lists into actionContext. (#6419) | Candidate: hybrid search analytics cleanup (result lists out of actionContext); apply to iOS instrumentation (re-included: hybrid search in scope). |
 | [x] | `c8c32f212a` | 2026-03-19 | Cooltey Feng | 1f, +1/−1 | Bump versionCode. (#6423) | Excluded: versionCode bump; iOS has its own versioning pipeline |
 | [x] | `cc4b73a619` | 2026-03-20 | dependabot[bot] | 2f, +2/−2 | Bump gradle-wrapper from 9.4.0 to 9.4.1 (#6418) | Excluded: Gradle wrapper version bump; iOS uses Xcode/Swift, not Gradle |
 | [ ] | `7a446fbc0e` | 2026-03-20 | Dmitry Brant | 3f, +26/−7 | Semantic search: Portuguese translation update. (#6425) | Candidate: Adds Portuguese example queries and copy for Hybrid Search onboarding; feature originates at window base, so iOS port would need same content. |
@@ -98,7 +102,7 @@ execution. Triage was conservative: uncertain commits were kept as candidates.
 | [ ] | `7c8259f06a` | 2026-03-24 | Dmitry Brant | 1f, +2/−4 | Semantic search instrumentation: send search-id for thumbs up/down. (#6441) | Candidate: Hybrid search originates at window boundary and iOS has TestKitchen; thumbs up/down events should send search-id in actionContext. |
 | [ ] | `ce3b24a1e3` | 2026-03-24 | William Rai | 9f, +61/−15 | Instrumentation for games hub (#6434) | Candidate: Adds Games Hub analytics events (impression, play, archive clicks); hub introduced in window, so iOS port needs matching instrumentation. |
 | [x] | `f4a1922bcc` | 2026-03-25 | dependabot[bot] | 1f, +1/−1 | Bump androidx.work:work-runtime-ktx from 2.11.1 to 2.11.2 (#6445) | Excluded: Dependabot dependency bump; iOS has its own dependency management |
-| [x] | `8075f8ca3b` | 2026-03-25 | Dmitry Brant | 8f, +119/−95 | Hybrid search: expanded instrumentation. (#6448) | Excluded: Rule C: analytics instrumentation for hybrid search experiment, absent on iOS and introduced at window base, not inside window. No user-facing change. |
+| [ ] | `8075f8ca3b` | 2026-03-25 | Dmitry Brant | 8f, +119/−95 | Hybrid search: expanded instrumentation. (#6448) | Candidate: expanded hybrid search instrumentation; iOS port needs matching events (re-included: hybrid search in scope). |
 | [x] | `bb95b4dea8` | 2026-03-26 | translatewiki.net | 8f, +39/−8 | Localisation updates from https://translatewiki.net. (#6450) | Excluded: Localization sync from translatewiki.net; iOS has own translation pipeline |
 | [ ] | `cb5af17ea7` | 2026-03-26 | Dmitry Brant | 1f, +1/−1 | Hybrid search: Update verbiage string. (#6451) | Candidate: User-facing Hybrid Search copy change; feature originated at the sync window base commit, so iOS port should use "human written" wording. |
 | [x] | `2d44e869cb` | 2026-03-26 | Dmitry Brant | 1f, +1/−1 | Bump versionCode. (#6454) | Excluded: versionCode bump only; iOS has independent versioning |
