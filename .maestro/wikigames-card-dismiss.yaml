@@ -1,0 +1,55 @@
+appId: org.wikipedia.dev
+name: WikiGames card dismiss disables the feed setting; undo restores it
+tags:
+  - wikigames
+---
+# State is seeded by run-wikigames.sh (onboarding suppressed, English).
+- launchApp
+- extendedWaitUntil:
+    visible: "Which came first?"
+    timeout: 20000
+# First-run feed announcement sits above the games card; dismiss it so the
+# games card header is the first card header on screen.
+- runFlow:
+    when:
+      visible: "Got it"
+    commands:
+      - tapOn: "Got it"
+      # Dismissing the announcement shows its own "Card hidden." snackbar;
+      # let it clear so it can't be confused with the games-card snackbar.
+      - extendedWaitUntil:
+          notVisible: "Card hidden."
+          timeout: 10000
+- takeScreenshot: .maestro/screenshots/android-wikigames-card
+- tapOn:
+    id: ".*view_list_card_header_menu"
+    index: 0
+- assertVisible: "Hide this card"
+- takeScreenshot: .maestro/screenshots/android-wikigames-card-menu
+- tapOn: "Hide this card"
+- extendedWaitUntil:
+    visible: "Card hidden."
+    timeout: 5000
+- assertNotVisible: "Which came first?"
+- takeScreenshot: .maestro/screenshots/android-wikigames-hidden-undo
+- tapOn: "Undo"
+- extendedWaitUntil:
+    visible: "Which came first?"
+    timeout: 10000
+- takeScreenshot: .maestro/screenshots/android-wikigames-restored
+# Dismiss again and relaunch: the fix makes dismissal disable the WikiGames
+# feed content type persistently, so the card must stay gone after restart.
+- tapOn:
+    id: ".*view_list_card_header_menu"
+    index: 0
+- tapOn: "Hide this card"
+- extendedWaitUntil:
+    visible: "Card hidden."
+    timeout: 5000
+- stopApp
+- launchApp
+- extendedWaitUntil:
+    visible: "Search Wikipedia"
+    timeout: 20000
+- assertNotVisible: "Which came first?"
+- takeScreenshot: .maestro/screenshots/android-wikigames-stays-hidden
