@@ -18,6 +18,7 @@ import org.wikipedia.analytics.testkitchen.TestKitchenAdapter
 import org.wikipedia.dataclient.ServiceFactory
 import org.wikipedia.dataclient.WikiSite
 import org.wikipedia.dataclient.okhttp.HttpStatusException
+import org.wikipedia.json.JsonUtil
 import org.wikipedia.settings.Prefs
 import org.wikipedia.util.ReleaseUtil
 import org.wikipedia.util.log.L
@@ -78,6 +79,12 @@ object EventPlatformClient {
      * @param event event
      */
     fun submit(event: Event) {
+        if (ReleaseUtil.isDevRelease) {
+            // Single-line event log, for Maestro test assertions (mirrors the TKEV
+            // seam in TestKitchenClient). Logged at submit time, before stream config
+            // and sampling checks, so tests can observe every submitted event.
+            L.i("EPEV " + JsonUtil.encodeToString(event))
+        }
         if (STREAM_CONFIGS.isEmpty()) {
             // We haven't gotten stream configs yet, so queue up the event in our initial queue.
             synchronized(INITIAL_QUEUE) {

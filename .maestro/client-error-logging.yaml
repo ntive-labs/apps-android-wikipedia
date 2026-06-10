@@ -1,0 +1,25 @@
+appId: org.wikipedia.dev
+name: HTTP failure submits a mediawiki.client.error event (2d908c3384)
+tags:
+  - mock
+---
+# Prerequisites (handled by run-client-error.sh):
+#   - fixture server running on host port 8081 (returns 404 for "errortrigger")
+#   - app state seeded via TestSetupReceiver: onboarding suppressed,
+#     API base URL pointed at http://10.0.2.2:8081
+# Do NOT use clearState here — it would wipe the seeded preferences.
+- launchApp
+- takeScreenshot: .maestro/screenshots/client-error-feed
+- tapOn:
+    id: ".*:id/nav_tab_search"
+- tapOn: "Search Wikipedia"
+- takeScreenshot: .maestro/screenshots/client-error-search-open
+- inputText: "errortrigger"
+# The prefixsearch request 404s -> UnsuccessfulResponseInterceptor throws
+# HttpStatusException and submits a ClientErrorEvent; search shows the
+# HTTP-error view (404 message plus the failing code/URL details).
+- extendedWaitUntil:
+    visible: "This page does not exist"
+    timeout: 15000
+- assertVisible: "Code: 404.*"
+- takeScreenshot: .maestro/screenshots/client-error-search-error
