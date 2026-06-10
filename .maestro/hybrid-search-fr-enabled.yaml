@@ -1,5 +1,5 @@
 appId: org.wikipedia.dev
-name: Hybrid search enabled for French app language (6240fa0d02)
+name: Hybrid search enabled for French app language (6240fa0d02, e95b52efc6)
 tags:
   - mock
   - hybrid-search
@@ -32,3 +32,12 @@ tags:
     timeout: 10000
 - assertVisible: "Beta"
 - takeScreenshot: .maestro/screenshots/android-hybrid-fr-onboarding
+# e95b52efc6: with fr as the primary app language the example queries are the
+# curated no-translate French set — even though the UI locale here is English,
+# because suggestedQueriesPerLanguage keys on the app language. Pre-commit
+# builds render the English default queries on this screen instead.
+- scrollUntilVisible:
+    element: "Origine des Jeux Olympiques"
+- assertVisible: "Pourquoi les étoiles semblent-elles scintiller la nuit ?"
+- assertVisible: "Pourquoi rêvons-nous ?"
+- takeScreenshot: .maestro/screenshots/android-hybrid-fr-onboarding-queries
