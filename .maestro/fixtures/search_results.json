@@ -1,21 +1,31 @@
 {
-  "batchcomplete": true,
-  "query": {
-    "pages": [
-      {
-        "pageid": 100001,
-        "ns": 0,
-        "title": "Maestro Mock Article",
-        "index": 1,
-        "description": "Result served by the local fixture server"
-      },
-      {
-        "pageid": 100002,
-        "ns": 0,
-        "title": "Maestro Second Result",
-        "index": 2,
-        "description": "Another canned result"
-      }
-    ]
-  }
+ "batchcomplete": true,
+ "query": {
+  "pages": [
+   {
+    "pageid": 100001,
+    "ns": 0,
+    "title": "Maestro Mock Article",
+    "index": 1,
+    "description": "Result served by the local fixture server",
+    "thumbnail": {
+     "source": "http://10.0.2.2:8081/test-thumb.png",
+     "width": 320,
+     "height": 320
+    }
+   },
+   {
+    "pageid": 100002,
+    "ns": 0,
+    "title": "Maestro Second Result",
+    "index": 2,
+    "description": "Another canned result",
+    "thumbnail": {
+     "source": "http://10.0.2.2:8081/test-thumb.png",
+     "width": 320,
+     "height": 320
+    }
+   }
+  ]
+ }
 }

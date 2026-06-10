@@ -10,7 +10,9 @@ empty JSON object, which MediaWiki response models parse as "no results".
 """
 import http.server
 import os
+import struct
 import sys
+import zlib
 
 PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 8081
 FIXTURE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -31,8 +33,34 @@ ROUTES = [
 ]
 
 
+def _solid_png(width, height, rgb):
+    """Minimal opaque solid-color PNG, no external deps. Used as a deterministic
+    thumbnail so flows can measure image processing (e.g. dark-mode dimming)."""
+    def chunk(tag, data):
+        return (struct.pack(">I", len(data)) + tag + data +
+                struct.pack(">I", zlib.crc32(tag + data) & 0xFFFFFFFF))
+    raw = b"".join(b"\x00" + bytes(rgb) * width for _ in range(height))
+    return (b"\x89PNG\r\n\x1a\n" +
+            chunk(b"IHDR", struct.pack(">IIBBBBB", width, height, 8, 2, 0, 0, 0)) +
+            chunk(b"IDAT", zlib.compress(raw)) +
+            chunk(b"IEND", b""))
+
+
+RED_THUMB = _solid_png(320, 320, (255, 0, 0))
+
+
 class Handler(http.server.BaseHTTPRequestHandler):
     def _respond(self):
+        # Deterministic pure-red thumbnail (see image-dimming flows): solid red is
+        # uniquely measurable in screenshots (no other UI pixel is red-dominant).
+        if "test-thumb.png" in self.path:
+            sys.stderr.write("[fixture] %s %s -> red thumb\n" % (self.command, self.path[:120]))
+            self.send_response(200)
+            self.send_header("Content-Type", "image/png")
+            self.send_header("Content-Length", str(len(RED_THUMB)))
+            self.end_headers()
+            self.wfile.write(RED_THUMB)
+            return
         body = b"{}"
         matched = "(default empty)"
         for fragment, fixture in ROUTES:

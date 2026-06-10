@@ -1,0 +1,49 @@
+appId: org.wikipedia.dev
+name: Dark-mode image dimming (native images via DimImageTransformation)
+tags:
+  - theme
+---
+# Prerequisites (handled by run-image-dimming.sh):
+#   - fixture server on host port 8081 (serves search results whose thumbnails
+#     are a deterministic pure-red PNG, also served by the fixture server)
+#   - app state seeded: onboarding suppressed, Dark theme (colorTheme=1),
+#     dimDarkModeImages on/off per scenario (STATE env: on|off), API base URL
+#     pointed at the fixture server.
+# Two separate seeded launches are used (instead of toggling in-app) because
+# the dim transformation is baked into Coil's in-memory image cache at load time.
+# Do NOT use clearState here — it would wipe the seeded preferences.
+- launchApp
+- tapOn:
+    id: ".*:id/nav_tab_search"
+- tapOn: "Search Wikipedia"
+- inputText: "maestro"
+- extendedWaitUntil:
+    visible: "Maestro Mock Article"
+    timeout: 15000
+- assertVisible: "Maestro Second Result"
+# Let the red fixture thumbnails finish loading before capturing.
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: .maestro/screenshots/android-image-dimming-search-${STATE}
+# Theme settings: verify the dimming switch is present in the App theme dialog.
+# (Back out of search — keyboard, then the search screen itself.)
+- repeat:
+    times: 3
+    while:
+      notVisible:
+        id: ".*:id/nav_tab_more"
+    commands:
+      - back
+- tapOn:
+    id: ".*:id/nav_tab_more"
+- tapOn: "Settings"
+- scrollUntilVisible:
+    element:
+      text: "App theme"
+- tapOn: "App theme"
+- extendedWaitUntil:
+    visible: "Image dimming (in Dark theme)"
+    timeout: 10000
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: .maestro/screenshots/android-image-dimming-theme-${STATE}
