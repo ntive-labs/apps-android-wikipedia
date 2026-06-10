@@ -1,0 +1,86 @@
+appId: org.wikipedia.dev
+name: 320px thumbnail HTTP failures are NOT reported to mediawiki.client.error (763158c976)
+tags:
+  - mock
+  - client-error
+---
+# State is seeded by run-client-error-thumb-skip.sh: onboarding suppressed and
+# the REST feed API pointed at the local fixture server, which serves the
+# onthisday_events_thumb404.json fixture. Every event page carries a thumbnail
+# URL that 404s (fixture "errortrigger" rule): 5 URLs contain /320px- (the
+# rate-limit noise this commit stops reporting) and 4 control URLs contain
+# /330px- (which must still be reported). Playing the full 5-question game
+# displays every event card, so the app requests all 9 thumbnails through the
+# shared OkHttp client -> UnsuccessfulResponseInterceptor. The runner then
+# asserts via the EPEV logcat seam that client-error events exist for the
+# /330px- control URLs and none exist for the /320px- URLs.
+- launchApp
+- extendedWaitUntil:
+    visible: "Which came first?"
+    timeout: 30000
+# Dismiss the first-run feed announcement if present so snackbars can't overlap.
+- runFlow:
+    when:
+      visible: "Got it"
+    commands:
+      - tapOn: "Got it"
+      - extendedWaitUntil:
+          notVisible: "Card hidden."
+          timeout: 10000
+- takeScreenshot: .maestro/screenshots/android-client-error-thumb-card
+- tapOn: "Which came first?"
+- extendedWaitUntil:
+    visible: "Play today's game"
+    timeout: 15000
+- takeScreenshot: .maestro/screenshots/android-client-error-thumb-menu
+- tapOn: "Play today's game"
+
+# ---- Question 1: both event cards request their (404ing) thumbnails ----
+- extendedWaitUntil:
+    visible:
+      id: ".*questionCard1"
+    timeout: 10000
+- takeScreenshot: .maestro/screenshots/android-client-error-thumb-q1
+- tapOn:
+    id: ".*questionCard1"
+- tapOn: "Submit"
+- extendedWaitUntil:
+    visible: "Next question"
+    timeout: 10000
+- takeScreenshot: .maestro/screenshots/android-client-error-thumb-q1-revealed
+- tapOn: "Next question"
+
+# ---- Questions 2-4 ----
+- repeat:
+    times: 3
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: ".*questionCard1"
+          timeout: 10000
+      - tapOn:
+          id: ".*questionCard1"
+      - tapOn: "Submit"
+      - extendedWaitUntil:
+          visible: "Next question"
+          timeout: 10000
+      - tapOn: "Next question"
+
+# ---- Question 5 ----
+- extendedWaitUntil:
+    visible:
+      id: ".*questionCard1"
+    timeout: 10000
+- tapOn:
+    id: ".*questionCard1"
+- tapOn: "Submit"
+- extendedWaitUntil:
+    visible: "Final results"
+    timeout: 10000
+- tapOn: "Final results"
+
+# ---- Results: every event has now been displayed (all 9 thumbnails requested) ----
+- extendedWaitUntil:
+    visible: "You scored.*"
+    timeout: 15000
+- takeScreenshot: .maestro/screenshots/android-client-error-thumb-results
