@@ -1,0 +1,56 @@
+appId: org.wikipedia.dev
+name: System dark theme defaults to Dark, not Black (8b7b08008f)
+tags:
+  - theme
+---
+# Prerequisites (handled by run-system-dark-theme.sh):
+#   - fixture server on host port 8081 (deterministic API base)
+#   - app state seeded per scenario (STATE env: light | dark | toggle):
+#       light  — matchSystemTheme=true,  colorTheme=0 (Light), system night mode OFF
+#       dark   — same seeded state, runner flipped system night mode ON between runs
+#       toggle — matchSystemTheme=false, colorTheme=0 (Light), system night mode ON
+# The runner verifies the resulting theme quantitatively from the screenshots:
+# Dark theme paper background is #202122; the pre-8b7b08008f fallback (Black
+# theme) is #000000.
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: ".*:id/nav_tab_more"
+    timeout: 20000
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: .maestro/screenshots/android-system-dark-theme-main-${STATE}
+# Settings screen: large uniform paper-color background for the runner's
+# dominant-color measurement, in every scenario.
+- tapOn:
+    id: ".*:id/nav_tab_more"
+- tapOn: "Settings"
+- extendedWaitUntil:
+    visible: "App theme"
+    timeout: 10000
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: .maestro/screenshots/android-system-dark-theme-settings-${STATE}
+# Theme chooser dialog (the second hunk of the Android commit lives here).
+- tapOn: "App theme"
+- extendedWaitUntil:
+    visible: "Match system theme"
+    timeout: 10000
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: .maestro/screenshots/android-system-dark-theme-chooser-${STATE}
+# toggle scenario: flip "Match system theme" ON while the system is already in
+# night mode and the app is Light — ThemeChooserDialog must switch the app to
+# Dark (post-fix) rather than Black (pre-fix).
+- runFlow:
+    when:
+      true: ${STATE == 'toggle'}
+    commands:
+      - tapOn:
+          id: ".*:id/theme_chooser_match_system_theme_switch"
+      - waitForAnimationToEnd:
+          timeout: 5000
+      - extendedWaitUntil:
+          visible: "Match system theme"
+          timeout: 10000
+      - takeScreenshot: .maestro/screenshots/android-system-dark-theme-chooser-toggled
