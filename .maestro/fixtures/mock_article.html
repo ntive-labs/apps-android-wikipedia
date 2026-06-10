@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<!-- Minimal stand-in for a PCS mobile-html article, served by server.py for
+     Maestro flows. Emits the same JS-bridge messages a real PCS page would
+     (via the pcsClient @JavascriptInterface), so PageFragment runs its normal
+     load-complete path, then lets the flow fire the real "pronunciation"
+     bridge event — exercising AvPlayer/MediaPlayerImplementation exactly as a
+     tap on a real article's pronunciation speaker icon does (6c43d3fe3c). -->
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  body { font-family: sans-serif; margin: 24px; padding-top: 96px; }
+  h1 { font-size: 28px; }
+  #play {
+    display: block; width: 100%; padding: 24px 8px; margin-top: 32px;
+    font-size: 22px; background: #36c; color: #fff; border: none; border-radius: 8px;
+  }
+</style>
+</head>
+<body>
+<h1>Maestro Mock Article</h1>
+<p>This article is served by the local fixture server.</p>
+<button id="play" onclick="playPronunciation()">PLAY PRONUNCIATION</button>
+<script>
+  function post(action, data) {
+    if (window.pcsClient) {
+      pcsClient.onReceiveMessage(JSON.stringify({action: action, data: data || {}}));
+    }
+  }
+  function playPronunciation() {
+    // Same payload shape as PCS sends for the title pronunciation button.
+    post('pronunciation', {url: 'http://10.0.2.2:8081/wikipedia/commons/4/41/test-pron.ogg'});
+  }
+  window.onload = function () {
+    post('setup', {});
+    post('final_setup', {});
+  };
+</script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+{
+  "type": "standard",
+  "title": "Maestro Mock Article",
+  "displaytitle": "Maestro Mock Article",
+  "namespace": {
+    "id": 0,
+    "text": ""
+  },
+  "titles": {
+    "canonical": "Maestro_Mock_Article",
+    "normalized": "Maestro Mock Article",
+    "display": "Maestro Mock Article"
+  },
+  "pageid": 424242,
+  "lang": "en",
+  "dir": "ltr",
+  "revision": "1",
+  "tid": "00000000-0000-0000-0000-000000000000",
+  "timestamp": "2026-01-01T00:00:00Z",
+  "description": "Article served by the local fixture server",
+  "extract": "Mock article used by Maestro flows to exercise the pronunciation audio player.",
+  "extract_html": "<p>Mock article used by Maestro flows to exercise the pronunciation audio player.</p>"
+}

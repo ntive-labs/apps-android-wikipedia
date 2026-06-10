@@ -36,6 +36,19 @@ ROUTES = [
     ("generator=prefixsearch", "search_results.json"),
     ("list=search", "search_results.json"),
     ("prop=info", "semantic_page_info.json"),
+    ("page/summary/", "page_summary.json"),
+]
+
+# Non-JSON routes: (url substring, fixture file, content type) — first match wins.
+# mock_article.html stands in for a PCS mobile-html article (pronunciation flow);
+# test-pron.* are real 1s audio files fetched by the platform media player, whose
+# request User-Agent the pronunciation-user-agent runner asserts on (6c43d3fe3c).
+# The .ogg.mp3 entry serves iOS-style transcoded-path requests (…/file.ogg/file.ogg.mp3).
+MEDIA_ROUTES = [
+    ("page/mobile-html/", "mock_article.html", "text/html; charset=utf-8"),
+    ("test-pron.ogg.mp3", "test-pron.mp3", "audio/mpeg"),
+    ("test-pron.ogg", "test-pron.ogg", "audio/ogg"),
+    ("test-pron.mp3", "test-pron.mp3", "audio/mpeg"),
 ]
 
 
@@ -56,11 +69,46 @@ RED_THUMB = _solid_png(320, 320, (255, 0, 0))
 
 
 class Handler(http.server.BaseHTTPRequestHandler):
+    def _log(self, outcome):
+        # Includes the request User-Agent: the pronunciation-user-agent runners
+        # grep this log to assert media players send the app UA (6c43d3fe3c).
+        sys.stderr.write("[fixture] %s %s -> %s UA=%s\n" % (
+            self.command, self.path[:120], outcome,
+            self.headers.get("User-Agent", "(none)")))
+
     def _respond(self):
+        # Media/HTML fixtures (served with their real content type).
+        for fragment, fixture, ctype in MEDIA_ROUTES:
+            if fragment in self.path:
+                with open(os.path.join(FIXTURE_DIR, fixture), "rb") as f:
+                    body = f.read()
+                self._log(fixture)
+                total = len(body)
+                # Media players probe with Range requests and expect 206es.
+                range_header = self.headers.get("Range")
+                if range_header and range_header.startswith("bytes="):
+                    spec = range_header[len("bytes="):].split(",")[0]
+                    start_s, _, end_s = spec.partition("-")
+                    start = int(start_s) if start_s else 0
+                    end = int(end_s) if end_s else total - 1
+                    end = min(end, total - 1)
+                    chunk = body[start:end + 1]
+                    self.send_response(206)
+                    self.send_header("Content-Range", "bytes %d-%d/%d" % (start, end, total))
+                else:
+                    chunk = body
+                    self.send_response(200)
+                self.send_header("Content-Type", ctype)
+                self.send_header("Content-Length", str(len(chunk)))
+                self.send_header("Accept-Ranges", "bytes")
+                self.end_headers()
+                if self.command != "HEAD":
+                    self.wfile.write(chunk)
+                return
         # Deterministic pure-red thumbnail (see image-dimming flows): solid red is
         # uniquely measurable in screenshots (no other UI pixel is red-dominant).
         if "test-thumb.png" in self.path:
-            sys.stderr.write("[fixture] %s %s -> red thumb\n" % (self.command, self.path[:120]))
+            self._log("red thumb")
             self.send_response(200)
             self.send_header("Content-Type", "image/png")
             self.send_header("Content-Length", str(len(RED_THUMB)))
@@ -71,7 +119,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
         # mentioning this magic term gets a 404, which the app's HTTP layer must
         # report to the mediawiki.client.error logging-intake stream.
         if "errortrigger" in self.path:
-            sys.stderr.write("[fixture] %s %s -> 404\n" % (self.command, self.path[:120]))
+            self._log("404")
             body = b"{}"
             self.send_response(404)
             self.send_header("Content-Type", "application/json; charset=utf-8")
@@ -91,7 +139,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 if len(route) > 2:
                     extra_headers = route[2]
                 break
-        sys.stderr.write("[fixture] %s %s -> %s\n" % (self.command, self.path[:120], matched))
+        self._log(matched)
         self.send_response(200)
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(body)))
@@ -102,6 +150,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
 
     do_GET = _respond
     do_POST = _respond
+    do_HEAD = _respond
 
     def log_message(self, fmt, *args):
         pass  # request logging handled in _respond

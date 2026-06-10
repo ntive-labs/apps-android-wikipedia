@@ -1,0 +1,35 @@
+appId: org.wikipedia.dev
+name: Pronunciation audio request carries the app User-Agent (6c43d3fe3c)
+tags:
+  - mock
+  - pronunciation
+---
+# 6c43d3fe3c: MediaPlayer instances must send the app User-Agent
+# (WikipediaApp/...) instead of the platform default (stagefright/...).
+#
+# The whole flow is fixture-served (run-pronunciation.sh): search results,
+# page summary, the article itself (mock_article.html, a stand-in PCS page
+# that emits real setup/final_setup bridge messages), and the pronunciation
+# audio. Tapping PLAY PRONUNCIATION fires the real "pronunciation" bridge
+# event -> AvPlayer/MediaPlayerImplementation fetches test-pron.ogg from the
+# fixture server, which logs the request's User-Agent; the runner asserts it
+# starts with WikipediaApp/.
+- launchApp
+- tapOn:
+    id: ".*:id/nav_tab_search"
+- tapOn: "Search Wikipedia"
+- inputText: "maestro"
+- assertVisible: "Maestro Mock Article"
+- takeScreenshot: .maestro/screenshots/pron-ua-search-results
+- tapOn: "Maestro Mock Article"
+# The fixture article finished loading when its body is visible.
+- extendedWaitUntil:
+    visible: "PLAY PRONUNCIATION"
+    timeout: 15000
+- takeScreenshot: .maestro/screenshots/pron-ua-article
+- tapOn: "PLAY PRONUNCIATION"
+# Playback of the 1s fixture clip: the audio fetch + UA assertion happen
+# server-side; the runner polls the fixture log after the flow ends.
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: .maestro/screenshots/pron-ua-after-tap
