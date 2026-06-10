@@ -1,0 +1,85 @@
+appId: org.wikipedia.dev
+name: WikiGames marks the game completed when saving progress on the last question
+tags:
+  - wikigames
+---
+# State is seeded by run-wikigames-complete-on-last.sh: onboarding suppressed and
+# the REST API pointed at the local fixture server (9-event On This Day fixture,
+# deterministic 5-question game). Regression test for commit fe1486bbed: answering
+# the LAST question must persist GAME_COMPLETED immediately, so killing the app at
+# the final reveal (before tapping "Final results") and relaunching must land on
+# the results screen. Pre-fix, the day stayed GAME_IN_PROGRESS and the relaunch
+# re-asked question 5 with a desynced index.
+- launchApp
+- extendedWaitUntil:
+    visible: "Which came first?"
+    timeout: 30000
+# Dismiss the first-run feed announcement if present so snackbars can't overlap.
+- runFlow:
+    when:
+      visible: "Got it"
+    commands:
+      - tapOn: "Got it"
+      - extendedWaitUntil:
+          notVisible: "Card hidden."
+          timeout: 10000
+- takeScreenshot: .maestro/screenshots/android-wikigames-complete-card
+- tapOn: "Which came first?"
+- extendedWaitUntil:
+    visible: "Play today's game"
+    timeout: 15000
+- tapOn: "Play today's game"
+
+# ---- Questions 1-4 ----
+- extendedWaitUntil:
+    visible:
+      id: ".*questionCard1"
+    timeout: 10000
+- takeScreenshot: .maestro/screenshots/android-wikigames-complete-q1
+- repeat:
+    times: 4
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: ".*questionCard1"
+          timeout: 10000
+      - tapOn:
+          id: ".*questionCard1"
+      - tapOn: "Submit"
+      - extendedWaitUntil:
+          visible: "Next question"
+          timeout: 10000
+      - tapOn: "Next question"
+
+# ---- Question 5: answer it, but do NOT tap "Final results" ----
+- extendedWaitUntil:
+    visible:
+      id: ".*questionCard1"
+    timeout: 10000
+- tapOn:
+    id: ".*questionCard1"
+- tapOn: "Submit"
+# The final reveal: this is the moment the fix changes the saved status from
+# GAME_IN_PROGRESS to GAME_COMPLETED.
+- extendedWaitUntil:
+    visible: "Final results"
+    timeout: 10000
+- takeScreenshot: .maestro/screenshots/android-wikigames-complete-q5-revealed
+
+# ---- Kill the app at the final reveal and relaunch ----
+- stopApp
+- launchApp
+- extendedWaitUntil:
+    visible: "Which came first?"
+    timeout: 30000
+- takeScreenshot: .maestro/screenshots/android-wikigames-complete-relaunched-card
+- tapOn: "Which came first?"
+# With the fix the saved status is GAME_COMPLETED, so re-entering the game must
+# land on the results screen — not re-ask question 5.
+- extendedWaitUntil:
+    visible: "You scored.*"
+    timeout: 20000
+- assertNotVisible: "Submit"
+- assertNotVisible:
+    id: ".*questionCard1"
+- takeScreenshot: .maestro/screenshots/android-wikigames-complete-results
