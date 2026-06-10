@@ -1,0 +1,37 @@
+appId: org.wikipedia.dev
+name: Hybrid search shows the "Search for:" bar when title-only search has no results
+tags:
+  - mock
+  - hybrid-search
+---
+# Verifies Android 9512546822: in the experiment's title-only (typing) screen,
+# zero lexical results must show the pinned "Search for:" semantic-search bar
+# instead of the generic "No results found" empty state, and tapping the bar
+# must run the semantic search for the raw query.
+#
+# Prerequisites (handled by run-hybrid-search.sh):
+#   - fixture server on host port 8081 (query "zzyzxnoresults" routes to the
+#     empty search fixture)
+#   - state seeded: ab_test_apps_hybridsearch=2 (semanticlexical), onboarding
+#     shown, hybrid search enabled, base URIs pointed at the fixture server
+# Do NOT use clearState here — it would wipe the seeded preferences.
+- launchApp
+- tapOn:
+    id: ".*:id/nav_tab_search"
+- assertVisible: "Search or ask anything"
+- tapOn: "Search or ask anything"
+- inputText: "zzyzxnoresults"
+# Zero title results: the bottom "Search for:" bar must appear...
+- extendedWaitUntil:
+    visible: "Search for: zzyzxnoresults"
+    timeout: 10000
+# ...and the generic empty state must NOT (hidden for the experiment).
+- assertNotVisible: "No results"
+- takeScreenshot: .maestro/screenshots/android-hybrid-empty-title-only
+# Tapping the bar runs the semantic search for the raw query.
+- tapOn: "Search for: zzyzxnoresults"
+- extendedWaitUntil:
+    visible: "Sourced from human generated Wikipedia articles"
+    timeout: 15000
+- assertVisible: "Rate this result"
+- takeScreenshot: .maestro/screenshots/android-hybrid-empty-title-only-results

@@ -114,6 +114,19 @@ expect_events close-button \
   '"element_id":"search_close"' \
   '"element_id":"search_back"'
 
+# Group C: a query with zero lexical results in the title-only screen must show
+# the pinned "Search for:" bar (not the "No results" empty state), and tapping
+# it runs the semantic search (Android 9512546822).
+run_scenario '
+  "ab_test_apps_hybridsearch": 2,
+  "hybridSearchOnboardingShown": true,
+  "hybridSearchEnabled": true
+' .maestro/hybrid-search-empty-title-only.yaml
+expect_events empty-title-only \
+  '"action":"search_init"' \
+  '"action":"show_hybrid_result"' \
+  '"assigned":"semanticlexical"'
+
 # Control group: no onboarding, standard search experience; standard search
 # events still flow with the control experiment group attached.
 run_scenario '

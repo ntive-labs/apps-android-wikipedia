@@ -21,6 +21,9 @@ FIXTURE_DIR = os.path.dirname(os.path.abspath(__file__))
 ROUTES = [
     ("feed/onthisday/events", os.environ.get("ONTHISDAY_FIXTURE", "onthisday_events_insufficient.json")),
     ("include_text=", "semantic_search_results.json"),
+    # Magic no-results query: lexical search for this term returns nothing.
+    # (Semantic search matches include_text= above, so it still gets results.)
+    ("zzyzxnoresults", "search_results_empty.json"),
     ("feed/configuration", "remote_config.json"),
     ("generator=prefixsearch", "search_results.json"),
     ("list=search", "search_results.json"),
