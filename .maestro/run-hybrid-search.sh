@@ -23,7 +23,9 @@ SERVER_PID=$!
 trap 'kill $SERVER_PID 2>/dev/null || true' EXIT
 
 # Base seed: suppress first-run UI, point MediaWiki + semantic-search APIs at
-# the fixture server, and pin remote config so "en" is a hybrid-search language.
+# the fixture server, and make "en" a hybrid-search language via the dev seam
+# (6240fa0d02 removed the remote-config hybridSearchLanguages override; the
+# compiled-in list is now el+fr — see the fr-enabled scenario below).
 BASE_SEED='
   "initialOnboardingEnabled": false,
   "exploreFeedUpdatePromptShown": true,
@@ -36,7 +38,8 @@ BASE_SEED='
   "mediaWikiBaseUri": "http://10.0.2.2:'"$PORT"'",
   "mediaWikiBaseUriSupportsLangCode": false,
   "semanticSearchBaseUri": "http://10.0.2.2:'"$PORT"'",
-  "remote_config": "{\"androidv1\":{\"hybridSearchEnabled\":true,\"hybridSearchLanguages\":[\"en\"]}}"
+  "hybridSearchSupportedLanguagesOverride": "en",
+  "remote_config": "{\"androidv1\":{\"hybridSearchEnabled\":true}}"
 '
 
 expect_events() {
@@ -109,7 +112,8 @@ expect_events results \
   '"action":"show_hybrid_result"' \
   '"element_id":"semantic_search_card"' \
   '"element_id":"thumb_up"' \
-  '"assigned":"semanticlexical"'
+  '"assigned":"semanticlexical"' \
+  '\"x_search_id\":\"maestro-search-id-123\"'
 
 # Group C again: close (X) button clears the query, keeps search active, and
 # logs search_close; backing out logs search_back.
@@ -157,6 +161,20 @@ expect_events no-results-keyboard \
   '"action":"search_init"' \
   '"element_id":"semantic_search_explicit"' \
   '"assigned":"semanticlexical"'
+
+# French app language, NO languages override (the "" seed clears the BASE_SEED
+# seam): onboarding must appear because "fr" is now in the compiled-in supported
+# list (6240fa0d02). Asserts French chrome plus the translated onboarding title.
+run_scenario '
+  "ab_test_apps_hybridsearch": 1,
+  "hybridSearchOnboardingShown": false,
+  "hybridSearchEnabled": false,
+  "hybridSearchSupportedLanguagesOverride": "",
+  "languageApp": "fr"
+' .maestro/hybrid-search-fr-enabled.yaml
+expect_events fr-enabled \
+  '"funnel_name":"hybrid_search_onboarding"' \
+  '"assigned":"lexicalsemantic"'
 
 # Control group: no onboarding, standard search experience; standard search
 # events still flow with the control experiment group attached.

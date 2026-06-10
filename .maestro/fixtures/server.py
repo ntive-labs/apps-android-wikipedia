@@ -17,14 +17,20 @@ import zlib
 PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 8081
 FIXTURE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# (url substring, fixture file) — first match wins.
+# (url substring, fixture file[, extra response headers]) — first match wins.
 # ONTHISDAY_FIXTURE selects the On This Day events fixture (e.g. the
 # insufficient-events scenario for the WikiGames pairing-fallback flow).
 ROUTES = [
     ("feed/onthisday/events", os.environ.get("ONTHISDAY_FIXTURE", "onthisday_events_insufficient.json")),
     ("include_text=", "semantic_search_results.json"),
+    # Semantic search via MediaWiki full-text search (6240fa0d02, non-el languages):
+    # MwQueryResponse with snippet/sectiontitle, plus the x-search-id header the app
+    # must thread into its hybrid analytics events. Placed before the no-results
+    # route so semantic results exist even for the magic empty lexical term.
+    ("cirrusSemanticSearch", "semantic_search_results_fulltext.json",
+     {"x-search-id": "maestro-search-id-123"}),
     # Magic no-results query: lexical search for this term returns nothing.
-    # (Semantic search matches include_text= above, so it still gets results.)
+    # (Semantic search matches cirrusSemanticSearch above, so it still gets results.)
     ("zzyzxnoresults", "search_results_empty.json"),
     ("feed/configuration", "remote_config.json"),
     ("generator=prefixsearch", "search_results.json"),
@@ -75,16 +81,22 @@ class Handler(http.server.BaseHTTPRequestHandler):
             return
         body = b"{}"
         matched = "(default empty)"
-        for fragment, fixture in ROUTES:
+        extra_headers = {}
+        for route in ROUTES:
+            fragment, fixture = route[0], route[1]
             if fragment in self.path:
                 with open(os.path.join(FIXTURE_DIR, fixture), "rb") as f:
                     body = f.read()
                 matched = fixture
+                if len(route) > 2:
+                    extra_headers = route[2]
                 break
         sys.stderr.write("[fixture] %s %s -> %s\n" % (self.command, self.path[:120], matched))
         self.send_response(200)
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(body)))
+        for name, value in extra_headers.items():
+            self.send_header(name, value)
         self.end_headers()
         self.wfile.write(body)
 

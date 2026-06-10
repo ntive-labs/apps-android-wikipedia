@@ -24,6 +24,7 @@
     <string name="preference_key_mediawiki_base_uri">mediaWikiBaseUri</string>
     <string name="preference_key_mediawiki_base_uri_supports_lang_code">mediaWikiBaseUriSupportsLangCode</string>
     <string name="preference_key_semantic_search_base_uri">semanticSearchBaseUri</string>
+    <string name="preference_key_hybrid_search_supported_languages_override">hybridSearchSupportedLanguagesOverride</string>
     <string name="preference_key_retrofit_log_level">retrofitLog</string>
     <string name="preference_key_daily_event_time_task_name">dailyEventTask</string>
     <string name="preference_key_talk_offline_cleanup_task_name">talkOfflineCleanupTask</string>

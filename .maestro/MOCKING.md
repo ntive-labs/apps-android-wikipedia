@@ -88,6 +88,15 @@ Wikipedia. From the emulator, the host machine is `10.0.2.2`.
 The fixture server prints every request it receives — when a flow doesn't show
 the data you expect, check that log first to see what the app actually asked for.
 
+## Other dev seams
+
+- `hybridSearchSupportedLanguagesOverride` (string pref, comma-separated language
+  codes): when nonempty, replaces `HybridSearchAbCTest`'s compiled-in
+  supported-languages list (el, fr). Lets flows run the hybrid-search experiment
+  in English. Mirrors the iOS `WMFHybridSearchSupportedLanguagesOverride` launch
+  argument. Added with the 6240fa0d02 sync, which removed the remote-config
+  language override the flows previously seeded.
+
 ## Adding a new mock situation — checklist
 
 1. **Is it already pref-controlled?** Most dialogs, onboarding, A/B buckets,

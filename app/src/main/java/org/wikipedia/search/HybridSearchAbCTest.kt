@@ -28,7 +28,9 @@ class HybridSearchAbCTest : ABTest("apps_hybridsearch", GROUP_SIZE_3) {
     }
 
     private fun isLanguageSupported(languageCode: String?): Boolean {
-        return supportedLanguages.any { it.equals(languageCode, true) }
+        val override = Prefs.hybridSearchSupportedLanguagesOverride
+        val languages = if (override.isNotEmpty()) override.split(",").map { it.trim() } else supportedLanguages
+        return languages.any { it.equals(languageCode, true) }
     }
 
     fun shouldShowOnboarding(languageCode: String?): Boolean {

@@ -1,0 +1,34 @@
+appId: org.wikipedia.dev
+name: Hybrid search enabled for French app language (6240fa0d02)
+tags:
+  - mock
+  - hybrid-search
+---
+# Verifies Android 6240fa0d02: "fr" is now in HybridSearchAbCTest's compiled-in
+# supported-languages list. The scenario seeds the primary app language to fr
+# and clears the supported-languages dev override, so the hybrid onboarding can
+# only appear if fr is genuinely supported in production code (the onboarding
+# gate checks the primary app language; with the override cleared, an unseeded
+# or en-primary state would never onboard).
+#
+# Note: languageApp controls the content/search language, not the UI locale,
+# so the chrome stays English on an English emulator.
+#
+# Prerequisites (handled by run-hybrid-search.sh):
+#   - fixture server on host port 8081
+#   - state seeded: languageApp=fr, ab_test_apps_hybridsearch=1 (lexicalsemantic),
+#     hybridSearchOnboardingShown=false, hybridSearchSupportedLanguagesOverride=""
+# Do NOT use clearState here — it would wipe the seeded preferences.
+- launchApp
+- tapOn:
+    id: ".*:id/nav_tab_search"
+- assertVisible: "Search Wikipedia"
+- takeScreenshot: .maestro/screenshots/android-hybrid-fr-search-tab
+- tapOn: "Search Wikipedia"
+# Opening search intercepts with the hybrid onboarding — only possible because
+# the fr primary app language is in the compiled-in supported list.
+- extendedWaitUntil:
+    visible: "A new way to search"
+    timeout: 10000
+- assertVisible: "Beta"
+- takeScreenshot: .maestro/screenshots/android-hybrid-fr-onboarding

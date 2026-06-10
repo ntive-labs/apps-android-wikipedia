@@ -177,6 +177,12 @@ object Prefs {
     val semanticSearchBaseUrl
         get() = PrefsIoUtil.getString(R.string.preference_key_semantic_search_base_uri, "")!!
 
+    // Test/dev seam (see .maestro/MOCKING.md): comma-separated list of language codes that
+    // replaces HybridSearchAbCTest.supportedLanguages when nonempty. Mirrors the iOS
+    // WMFHybridSearchSupportedLanguagesOverride launch-argument seam.
+    val hybridSearchSupportedLanguagesOverride
+        get() = PrefsIoUtil.getString(R.string.preference_key_hybrid_search_supported_languages_override, "")!!
+
     var eventPlatformIntakeUriOverride
         get() = PrefsIoUtil.getString(R.string.preference_key_event_platform_intake_base_uri, "")
         set(value) = PrefsIoUtil.setString(R.string.preference_key_event_platform_intake_base_uri, value)
