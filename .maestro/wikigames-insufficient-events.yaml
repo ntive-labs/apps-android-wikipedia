@@ -1,0 +1,88 @@
+appId: org.wikipedia.dev
+name: WikiGames plays through a day with insufficient On This Day events (no error page)
+tags:
+  - wikigames
+---
+# State is seeded by run-wikigames-insufficient.sh: onboarding suppressed and the
+# REST API pointed at the local fixture server, which serves only 9 usable
+# On This Day events (4 real pairs + 1 leftover). Pre-fix (e17bbd4e49) the game
+# built only 8 events and question 5 crashed into a stuck error page; with the
+# fix the leftover event is paired with a synthesized year+10 blank event and
+# the game completes normally.
+- launchApp
+- extendedWaitUntil:
+    visible: "Which came first?"
+    timeout: 30000
+# Dismiss the first-run feed announcement if present so snackbars can't overlap.
+- runFlow:
+    when:
+      visible: "Got it"
+    commands:
+      - tapOn: "Got it"
+      - extendedWaitUntil:
+          notVisible: "Card hidden."
+          timeout: 10000
+- takeScreenshot: .maestro/screenshots/android-wikigames-insufficient-card
+- tapOn: "Which came first?"
+# Game menu must load (events fetched + paired) instead of the error view.
+- extendedWaitUntil:
+    visible: "Play today's game"
+    timeout: 15000
+- assertNotVisible: "An error occurred"
+- takeScreenshot: .maestro/screenshots/android-wikigames-insufficient-menu
+- tapOn: "Play today's game"
+
+# ---- Question 1 ----
+- extendedWaitUntil:
+    visible:
+      id: ".*questionCard1"
+    timeout: 10000
+- takeScreenshot: .maestro/screenshots/android-wikigames-insufficient-q1
+- tapOn:
+    id: ".*questionCard1"
+- tapOn: "Submit"
+- extendedWaitUntil:
+    visible: "Next question"
+    timeout: 10000
+- takeScreenshot: .maestro/screenshots/android-wikigames-insufficient-q1-revealed
+- tapOn: "Next question"
+
+# ---- Questions 2-4 ----
+- repeat:
+    times: 3
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: ".*questionCard1"
+          timeout: 10000
+      - tapOn:
+          id: ".*questionCard1"
+      - tapOn: "Submit"
+      - extendedWaitUntil:
+          visible: "Next question"
+          timeout: 10000
+      - tapOn: "Next question"
+
+# ---- Question 5: the synthesized-pair question (leftover event + blank card) ----
+- extendedWaitUntil:
+    visible:
+      id: ".*questionCard1"
+    timeout: 10000
+- assertNotVisible: "An error occurred"
+- takeScreenshot: .maestro/screenshots/android-wikigames-insufficient-q5-fallback
+- tapOn:
+    id: ".*questionCard1"
+- tapOn: "Submit"
+# Last question reveals "Final results" instead of "Next question".
+- extendedWaitUntil:
+    visible: "Final results"
+    timeout: 10000
+- takeScreenshot: .maestro/screenshots/android-wikigames-insufficient-q5-revealed
+- tapOn: "Final results"
+
+# ---- Results: the game completed instead of locking on the error page ----
+- extendedWaitUntil:
+    visible: "You scored.*"
+    timeout: 15000
+- assertNotVisible: "An error occurred"
+- takeScreenshot: .maestro/screenshots/android-wikigames-insufficient-results
