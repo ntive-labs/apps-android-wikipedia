@@ -32,7 +32,7 @@ object TestKitchenAdapter : ClientDataCallback, EventSender {
         sourceConfigInit = null,
         clientDataCallback = this,
         logger = logger
-    )
+    ).apply { logSubmittedEvents = ReleaseUtil.isDevRelease }
 
     override fun getAgentData(): AgentData {
         return AgentData(

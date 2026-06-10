@@ -1,5 +1,6 @@
 package org.wikimedia.testkitchen
 
+import kotlinx.serialization.json.Json
 import org.wikimedia.testkitchen.config.SourceConfig
 import org.wikimedia.testkitchen.config.StreamConfig
 import org.wikimedia.testkitchen.context.ClientData
@@ -24,6 +25,10 @@ class TestKitchenClient(
 ) {
 
     private var sourceConfig = AtomicReference<SourceConfig>(sourceConfigInit)
+
+    // Test seam: when enabled (dev builds), each submitted event is logged so
+    // UI tests can assert instrumentation without depending on network flushes.
+    var logSubmittedEvents = false
 
     fun updateSourceConfig(configs: Map<String, StreamConfig>) {
         sourceConfig.set(SourceConfig(configs))
@@ -149,6 +154,9 @@ class TestKitchenClient(
      * @param event a processed event
      */
     private fun addToEventQueue(event: Event?) {
+        if (logSubmittedEvents && event != null) {
+            logger.info("TKEV " + Json.encodeToString(event))
+        }
         var eventQueueAppendAttempts = max(eventQueue.size / 50, 10)
 
         if (eventQueue.size > queueCapacity / 2) {
