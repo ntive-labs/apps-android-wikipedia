@@ -83,10 +83,18 @@ run_scenario '
 expect_events onboarding \
   '"funnel_name":"hybrid_search_onboarding"' \
   '"element_id":"onboarding_query"' \
+  '"element_id":"learn_more"' \
   '"enrolled":"apps_hybridsearch"' \
   '"assigned":"lexicalsemantic"' \
   '"action":"show_hybrid_result"' \
   '"action":"search_impression"'
+# b7745030f3: the onboarding Learn More button must log learn_more, never the
+# old learn_button elementId.
+if adb logcat -d | grep "TKEV" | grep -qF '"element_id":"learn_button"'; then
+  echo "FAIL [onboarding]: obsolete learn_button event was emitted." >&2
+  exit 1
+fi
+echo "OK [onboarding]: no obsolete learn_button event."
 
 # Group C (semanticlexical): onboarding already done; manual query shows
 # title-only suggestions, then semantic-first results with rating buttons.

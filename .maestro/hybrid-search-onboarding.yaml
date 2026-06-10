@@ -19,6 +19,24 @@ tags:
 - assertVisible: "Ask questions, get answers"
 - assertVisible: "Need inspiration?"
 - takeScreenshot: .maestro/screenshots/android-hybrid-onboarding
+# Learn More opens the info page in an external browser and logs
+# click/learn_more (was learn_button before b7745030f3); the onboarding
+# activity stays beneath, so back returns to it.
+- tapOn: "Learn more"
+# Chrome cold-starts can be slow; the first-ever launch additionally shows a
+# first-run screen (dismiss it once per emulator: "Use without an account").
+- extendedWaitUntil:
+    notVisible: "Need inspiration?"
+    timeout: 25000
+- takeScreenshot: .maestro/screenshots/android-hybrid-onboarding-learn-more-browser
+# Foreground the app again (back inside Chrome only navigates browser history);
+# the onboarding activity is still on top of the app's task.
+- launchApp:
+    appId: org.wikipedia.dev
+    stopApp: false
+- extendedWaitUntil:
+    visible: "A new way to search"
+    timeout: 10000
 - tapOn: "When was Pluto unlisted as a planet?"
 # Example query launches SearchActivity with the query and starts a hybrid search.
 - extendedWaitUntil:
