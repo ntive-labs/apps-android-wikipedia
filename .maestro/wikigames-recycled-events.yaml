@@ -1,15 +1,15 @@
 appId: org.wikipedia.dev
-name: WikiGames plays through a day with insufficient On This Day events (no error page)
+name: WikiGames plays a full game on a day with only 3 events (recycled pairing)
 tags:
   - wikigames
 ---
-# State is seeded by run-wikigames-insufficient.sh: onboarding suppressed and the
-# REST API pointed at the local fixture server, which serves only 9 usable
-# On This Day events (4 real pairs + 1 leftover). Pre-fix (e17bbd4e49) the game
-# built only 8 events and question 5 crashed into a stuck error page; with the
-# e17bbd4e49 fix the leftover event was paired with a synthesized year+10 blank
-# event; since 4824d3a9f7 it is instead paired with a recycled real event drawn
-# from a copy of the pool. Either way the game completes normally.
+# State is seeded by run-wikigames-recycled.sh: onboarding suppressed and the
+# REST API pointed at the local fixture server, which serves only 3 usable
+# On This Day events. Pre-fix (4824d3a9f7) the pairing loop ran out of events
+# after question 2 and crashed (removeAt on an empty list) into the stuck error
+# page. With the fix, events are recycled from a copy of the pool
+# (allEventsCopy[index % size] for event1, any different-year copy event as the
+# partner fallback), so the day yields a full 5-question game.
 - launchApp
 - extendedWaitUntil:
     visible: "Which came first?"
@@ -23,14 +23,14 @@ tags:
       - extendedWaitUntil:
           notVisible: "Card hidden."
           timeout: 10000
-- takeScreenshot: .maestro/screenshots/android-wikigames-insufficient-card
+- takeScreenshot: .maestro/screenshots/android-wikigames-recycled-card
 - tapOn: "Which came first?"
 # Game menu must load (events fetched + paired) instead of the error view.
 - extendedWaitUntil:
     visible: "Play today's game"
     timeout: 15000
 - assertNotVisible: "An error occurred"
-- takeScreenshot: .maestro/screenshots/android-wikigames-insufficient-menu
+- takeScreenshot: .maestro/screenshots/android-wikigames-recycled-menu
 - tapOn: "Play today's game"
 
 # ---- Question 1 ----
@@ -38,17 +38,17 @@ tags:
     visible:
       id: ".*questionCard1"
     timeout: 10000
-- takeScreenshot: .maestro/screenshots/android-wikigames-insufficient-q1
+- takeScreenshot: .maestro/screenshots/android-wikigames-recycled-q1
 - tapOn:
     id: ".*questionCard1"
 - tapOn: "Submit"
 - extendedWaitUntil:
     visible: "Next question"
     timeout: 10000
-- takeScreenshot: .maestro/screenshots/android-wikigames-insufficient-q1-revealed
+- takeScreenshot: .maestro/screenshots/android-wikigames-recycled-q1-revealed
 - tapOn: "Next question"
 
-# ---- Questions 2-4 ----
+# ---- Questions 2-4: pool exhausted, every pair is recycled ----
 - repeat:
     times: 3
     commands:
@@ -56,6 +56,7 @@ tags:
           visible:
             id: ".*questionCard1"
           timeout: 10000
+      - assertNotVisible: "An error occurred"
       - tapOn:
           id: ".*questionCard1"
       - tapOn: "Submit"
@@ -64,13 +65,13 @@ tags:
           timeout: 10000
       - tapOn: "Next question"
 
-# ---- Question 5: the fallback pair (leftover event + recycled real event) ----
+# ---- Question 5: still a real recycled pair, no error, no blank card ----
 - extendedWaitUntil:
     visible:
       id: ".*questionCard1"
     timeout: 10000
 - assertNotVisible: "An error occurred"
-- takeScreenshot: .maestro/screenshots/android-wikigames-insufficient-q5-fallback
+- takeScreenshot: .maestro/screenshots/android-wikigames-recycled-q5
 - tapOn:
     id: ".*questionCard1"
 - tapOn: "Submit"
@@ -78,12 +79,12 @@ tags:
 - extendedWaitUntil:
     visible: "Final results"
     timeout: 10000
-- takeScreenshot: .maestro/screenshots/android-wikigames-insufficient-q5-revealed
+- takeScreenshot: .maestro/screenshots/android-wikigames-recycled-q5-revealed
 - tapOn: "Final results"
 
-# ---- Results: the game completed instead of locking on the error page ----
+# ---- Results: the 3-event day completed instead of locking on the error page ----
 - extendedWaitUntil:
     visible: "You scored.*"
     timeout: 15000
 - assertNotVisible: "An error occurred"
-- takeScreenshot: .maestro/screenshots/android-wikigames-insufficient-results
+- takeScreenshot: .maestro/screenshots/android-wikigames-recycled-results
