@@ -1,0 +1,63 @@
+appId: org.wikipedia.dev
+name: Hybrid search re-shows the keyboard when the title-only screen has no results
+tags:
+  - mock
+  - hybrid-search
+---
+# Verifies Android 4778ade23b: when the experiment's title-only (typing) screen
+# renders its zero-results state ("Search for:" bar) and the keyboard is down,
+# the soft keyboard must be shown again so the user can refine the query — but
+# only when the target language has the experiment on ("toolbar is up").
+#
+# Scenario (round trip through a non-experiment language, keyboard hidden by
+# entering hybrid results — the realistic way the keyboard goes down in search):
+#   1. en (experiment on): no-results query -> "Search for:" bar, keyboard up.
+#   2. Tap the bar -> hybrid results; entering them hides the keyboard.
+#   3. Tap FR (NOT in hybridSearchLanguages) -> standard "No results" empty
+#      state; keyboard must stay hidden (no experiment toolbar in target lang).
+#   4. Tap EN -> empty title-only state re-renders with the "Search for:" bar
+#      and the keyboard comes back up (the fix).
+#
+# Prerequisites (handled by run-hybrid-search.sh):
+#   - fixture server on host port 8081 ("zzyzxnoresults" -> empty lexical
+#     results in every language; semantic API -> canned results)
+#   - state seeded: ab_test_apps_hybridsearch=2 (semanticlexical), onboarding
+#     shown, hybrid search enabled, app languages en+fr, remote config
+#     hybridSearchLanguages=["en"] only
+# Do NOT use clearState here — it would wipe the seeded preferences.
+- launchApp
+- tapOn:
+    id: ".*:id/nav_tab_search"
+- assertVisible: "Search or ask anything"
+- tapOn: "Search or ask anything"
+- inputText: "zzyzxnoresults"
+# Zero title results: the bottom "Search for:" bar appears (keyboard up from typing).
+- extendedWaitUntil:
+    visible: "Search for: zzyzxnoresults"
+    timeout: 10000
+- assertNotVisible: "No results"
+- takeScreenshot: .maestro/screenshots/android-hybrid-no-results-keyboard-bar
+# Run the semantic search: entering hybrid results hides the keyboard.
+- tapOn: "Search for: zzyzxnoresults"
+- extendedWaitUntil:
+    visible: "Sourced from human generated Wikipedia articles"
+    timeout: 15000
+- takeScreenshot: .maestro/screenshots/android-hybrid-no-results-keyboard-results
+# Switch to French (not an experiment language): standard empty state, and the
+# keyboard must NOT come back ("only if toolbar is up in target lang").
+- tapOn: "FR"
+- extendedWaitUntil:
+    visible: "No results"
+    timeout: 10000
+- assertNotVisible: "Search for: zzyzxnoresults"
+- takeScreenshot: .maestro/screenshots/android-hybrid-no-results-keyboard-fr-standard
+# Switch back to English: the empty title-only state re-renders with the
+# "Search for:" bar and must bring the keyboard back up (the fix).
+- tapOn: "EN"
+- extendedWaitUntil:
+    visible: "Search for: zzyzxnoresults"
+    timeout: 10000
+- assertNotVisible: "No results"
+- takeScreenshot: .maestro/screenshots/android-hybrid-no-results-keyboard-reshown
+# Keyboard visibility is not part of the view hierarchy on Android; the
+# screenshots prove it visually and run-hybrid-search.sh asserts mInputShown.

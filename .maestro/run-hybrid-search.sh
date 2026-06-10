@@ -127,6 +127,29 @@ expect_events empty-title-only \
   '"action":"show_hybrid_result"' \
   '"assigned":"semanticlexical"'
 
+# Group C, two app languages (en + fr, only en hybrid-enabled): entering hybrid
+# results hides the keyboard; switching to the FR tab shows the standard
+# "No results" state (keyboard stays down); switching back to EN re-renders the
+# empty title-only state and must bring the soft keyboard back up
+# (Android 4778ade23b). Keyboard visibility is asserted via dumpsys, since the
+# IME is not part of the app's view hierarchy.
+run_scenario '
+  "ab_test_apps_hybridsearch": 2,
+  "hybridSearchOnboardingShown": true,
+  "hybridSearchEnabled": true,
+  "languageApp": "en,fr"
+' .maestro/hybrid-search-no-results-keyboard.yaml
+if adb shell dumpsys input_method | grep -q "mInputShown=true"; then
+  echo "OK [no-results-keyboard]: soft keyboard is shown after returning to the experiment language tab."
+else
+  echo "FAIL [no-results-keyboard]: soft keyboard not shown after returning to the experiment language tab." >&2
+  exit 1
+fi
+expect_events no-results-keyboard \
+  '"action":"search_init"' \
+  '"element_id":"semantic_search_explicit"' \
+  '"assigned":"semanticlexical"'
+
 # Control group: no onboarding, standard search experience; standard search
 # events still flow with the control experiment group attached.
 run_scenario '
