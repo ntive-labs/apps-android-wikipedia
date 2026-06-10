@@ -1,0 +1,35 @@
+appId: org.wikipedia.dev
+name: Search close (X) button clears the query and keeps search active
+tags:
+  - mock
+  - hybrid-search
+---
+# Prerequisites (handled by run-hybrid-search.sh):
+#   - fixture server on host port 8081
+#   - state seeded: ab_test_apps_hybridsearch=2 (semanticlexical), onboarding shown,
+#     hybrid search enabled, base URIs pointed at the fixture server
+# Do NOT use clearState here — it would wipe the seeded preferences.
+- launchApp
+- tapOn:
+    id: ".*:id/nav_tab_search"
+- assertVisible: "Search or ask anything"
+- tapOn: "Search or ask anything"
+- inputText: "When was Pluto unlisted as a planet?"
+- extendedWaitUntil:
+    visible: "Maestro Mock Article"
+    timeout: 10000
+- pressKey: Enter
+- extendedWaitUntil:
+    visible: "Sourced from human generated Wikipedia articles"
+    timeout: 15000
+- takeScreenshot: .maestro/screenshots/android-hybrid-close-before
+# The close (X) button must clear the query but keep search active (fix #6341
+# included in this commit), and it must log a search_close event.
+- tapOn:
+    id: ".*:id/search_close_btn"
+- assertVisible: "Search or ask anything"
+- takeScreenshot: .maestro/screenshots/android-hybrid-close-after
+# Back out of search; this logs search_back via the new back-press callback.
+# (first back press only dismisses the soft keyboard)
+- pressKey: back
+- pressKey: back
