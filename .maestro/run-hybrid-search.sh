@@ -176,6 +176,32 @@ expect_events fr-enabled \
   '"funnel_name":"hybrid_search_onboarding"' \
   '"assigned":"lexicalsemantic"'
 
+# French strings (6d0b3e0c4e): same fr-enabled scenario, but the app's UI
+# locale is also set to French (per-app locale, API 33+) so values-fr resources
+# render. The flow asserts this commit's updated FR copy through onboarding,
+# results header, turn-off menu, and the hybrid search hint. The locale is set
+# AFTER the pm clear/seed (run_scenario) and reset afterwards so later
+# scenarios keep the English chrome.
+FR_SEED='
+  "ab_test_apps_hybridsearch": 1,
+  "hybridSearchOnboardingShown": false,
+  "hybridSearchEnabled": false,
+  "hybridSearchSupportedLanguagesOverride": "",
+  "languageApp": "fr"
+'
+adb shell pm clear $PKG
+.maestro/seed-prefs.sh "{ $BASE_SEED, $FR_SEED }"
+adb logcat -c
+adb shell cmd locale set-app-locales $PKG --locales fr-FR
+trap 'adb shell cmd locale set-app-locales $PKG --locales ""; kill $SERVER_PID 2>/dev/null || true' EXIT
+maestro test .maestro/hybrid-search-fr-strings.yaml
+adb shell cmd locale set-app-locales $PKG --locales ""
+trap 'kill $SERVER_PID 2>/dev/null || true' EXIT
+expect_events fr-strings \
+  '"funnel_name":"hybrid_search_onboarding"' \
+  '"element_id":"onboarding_query"' \
+  '"assigned":"lexicalsemantic"'
+
 # Control group: no onboarding, standard search experience; standard search
 # events still flow with the control experiment group attached.
 run_scenario '

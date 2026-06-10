@@ -1,0 +1,69 @@
+appId: org.wikipedia.dev
+name: Hybrid search French strings (6d0b3e0c4e)
+tags:
+  - mock
+  - hybrid-search
+---
+# Verifies Android 6d0b3e0c4e: updated French copy for the hybrid-search
+# experiment. Unlike hybrid-search-fr-enabled.yaml (which keeps the English UI
+# locale and only proves the fr gate), this scenario ALSO sets the app's UI
+# locale to French (runner: `adb shell cmd locale set-app-locales ... fr-FR`),
+# so values-fr resources render and the flow can assert this commit's copy.
+# Seven of the asserted strings changed in 6d0b3e0c4e, so the flow fails
+# against a pre-commit build (e.g. old title "Une nouvelle façon de faire des
+# recherches").
+#
+# Prerequisites (handled by run-hybrid-search.sh):
+#   - fixture server on host port 8081
+#   - state seeded: languageApp=fr, ab_test_apps_hybridsearch=1 (lexicalsemantic),
+#     hybridSearchOnboardingShown=false, hybridSearchSupportedLanguagesOverride=""
+#   - per-app UI locale set to fr-FR AFTER the pm clear + seed
+# Do NOT use clearState here — it would wipe the seeded preferences.
+- launchApp
+- tapOn:
+    id: ".*:id/nav_tab_search"
+# French chrome (standard hint, pre-onboarding) proves the UI locale took effect.
+- assertVisible: "Rechercher dans Wikipédia"
+- takeScreenshot: .maestro/screenshots/android-hybrid-fr-strings-search-tab
+- tapOn: "Rechercher dans Wikipédia"
+# Onboarding renders the values-fr copy from this commit.
+- extendedWaitUntil:
+    visible: "Une nouvelle façon de rechercher"
+    timeout: 10000
+- assertVisible: "Bêta"
+- assertVisible: "Posez des questions, obtenez des réponses"
+- assertVisible: "Cette fonctionnalité expérimentale utilise le langage naturel. Au lieu de rechercher des mots-clés, décrivez ce que vous voulez savoir."
+- assertVisible: "Fonctionnalité bêta"
+- assertVisible: "Disponible pour une durée limitée pendant cette phase de test."
+- assertVisible: "En savoir plus"
+- takeScreenshot: .maestro/screenshots/android-hybrid-fr-strings-onboarding
+# Sample queries (updated wording in this commit).
+- scrollUntilVisible:
+    element: "Pourquoi les gens mettent-ils de l'ananas sur leur pizza ?"
+- assertVisible: "Besoin d'inspiration ?"
+- assertVisible: "Quand Pluton a-t-elle été retirée de la liste des planètes ?"
+- assertVisible: "Premiers Jeux Olympiques"
+- assertVisible: "ARN ou ADN"
+- takeScreenshot: .maestro/screenshots/android-hybrid-fr-strings-onboarding-queries
+# Example query opts in and starts a hybrid search; the results header shows
+# the new attribution line.
+- tapOn: "Premiers Jeux Olympiques"
+- extendedWaitUntil:
+    visible: "Issu d’articles Wikipédia rédigés par des humains"
+    timeout: 15000
+- takeScreenshot: .maestro/screenshots/android-hybrid-fr-strings-results
+# Info dropdown carries the renamed turn-off action.
+- tapOn: "Icône des informations"
+- assertVisible: "Désactiver cette fonctionnalité expérimentale"
+- takeScreenshot: .maestro/screenshots/android-hybrid-fr-strings-turn-off-menu
+- pressKey: back
+# Group B = lexical results first; scroll down to the semantic rating cards.
+- scrollUntilVisible:
+    element: "Évaluez ce résultat"
+- takeScreenshot: .maestro/screenshots/android-hybrid-fr-strings-rate-card
+# Clearing the query (X) returns to the search box, which now shows the
+# hybrid placeholder from this commit.
+- tapOn:
+    id: ".*:id/search_close_btn"
+- assertVisible: "Rechercher ou poser une question"
+- takeScreenshot: .maestro/screenshots/android-hybrid-fr-strings-hint
