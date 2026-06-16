@@ -1,0 +1,61 @@
+# Cold-start path: drives initial onboarding -> personalization -> interest
+# selection, opts into the personalized "For you" home feed, and captures a
+# screenshot of the resulting feed.
+#
+# Run on a connected Android device/emulator with the dev flavor installed:
+#   maestro test maestro/for-you-onboarding.yaml
+#
+# Notes:
+# - clearState wipes prefs so onboarding always runs from scratch.
+# - Location permission is denied so the Places module shows its location
+#   prompt CTA instead of (non-deterministic) nearby articles.
+# - "Forward"/"Next" are the content-descriptions of the navigation arrows,
+#   matched here via Maestro's text selector.
+appId: org.wikipedia.dev
+---
+- launchApp:
+    clearState: true
+    permissions:
+      all: deny
+
+# --- Intro carousel ("All the world's knowledge" -> languages -> ...) ---
+# The intro has a variable number of pages, all advanced with the "Forward"
+# arrow. Tap it while it's visible; the personalization intro switches the
+# button to "Next", which stops this loop.
+- repeat:
+    times: 5
+    commands:
+      - runFlow:
+          when:
+            visible: "Forward"
+          commands:
+            - tapOn: "Forward"
+
+# --- Personalization intro ---
+- assertVisible: "Follow your curiosity"
+- tapOn: "Next"
+
+# --- Interest selection ---
+- assertVisible: "What are you interested in?"
+- tapOn: "Architecture"
+- tapOn: "Art"
+- tapOn: "Comics and anime"
+- tapOn: "Next"
+
+# --- Default home preference: choose the personalized "For you" feed ---
+- assertVisible: "What would you like to see first?"
+- tapOn: "Personalized content"
+- tapOn: "Next"
+
+# --- For You feed ---
+# The one-time "Swipe to explore" coach mark appears once the feed loads its
+# first modules. It renders in its own window over the feed, so dismiss it
+# before asserting on the tabs/cards underneath.
+- extendedWaitUntil:
+    visible: "Got it"
+    timeout: 15000
+- tapOn: "Got it"
+- assertVisible: "For you"
+# A fresh user with chosen interests always gets a "Based on your interest" card.
+- assertVisible: "Because of your interest:.*"
+- takeScreenshot: maestro/screenshots/for-you-onboarding-feed

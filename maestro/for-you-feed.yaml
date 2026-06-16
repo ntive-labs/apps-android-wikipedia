@@ -1,0 +1,52 @@
+# Already-onboarded happy path: assumes onboarding + personalization have
+# already been completed (e.g. by running for-you-onboarding.yaml first, or on
+# a device that has used the app). Opens the personalized "For you" home feed
+# and screenshots each module as it snaps into view.
+#
+# The "For you" feed is a vertically snapping pager: one module fills the
+# screen, and swiping up advances to the next module. Module order is fixed by
+# ForYouModuleType: Based on interest -> Because you read -> Continue reading
+# -> Places of interest -> Random. Modules with no content (e.g. Because you
+# read / Continue reading for a user with no history) are skipped, so the exact
+# set of cards varies per device.
+#
+# Run on a connected Android device/emulator with the dev flavor installed:
+#   maestro test maestro/for-you-feed.yaml
+appId: org.wikipedia.dev
+---
+- launchApp
+
+# Dismiss any launch-time interstitial (e.g. seasonal promos like the reading
+# challenge), which renders over the feed with a "Close" button.
+- runFlow:
+    when:
+      visible: "Close"
+    commands:
+      - tapOn: "Close"
+
+# Land on the For You tab (it's the default once "Personalized content" was
+# chosen, but tapping makes the flow robust regardless of the last tab).
+- assertVisible: "For you"
+- tapOn: "For you"
+
+# Dismiss the one-time "Swipe to explore" coach mark if it appears.
+- runFlow:
+    when:
+      visible: "Got it"
+    commands:
+      - tapOn: "Got it"
+
+# Screenshot the first module, then swipe through the rest of the feed.
+- takeScreenshot: maestro/screenshots/for-you-feed-01
+- swipe:
+    direction: UP
+- takeScreenshot: maestro/screenshots/for-you-feed-02
+- swipe:
+    direction: UP
+- takeScreenshot: maestro/screenshots/for-you-feed-03
+- swipe:
+    direction: UP
+- takeScreenshot: maestro/screenshots/for-you-feed-04
+- swipe:
+    direction: UP
+- takeScreenshot: maestro/screenshots/for-you-feed-05
