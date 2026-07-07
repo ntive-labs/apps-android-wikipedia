@@ -1,0 +1,202 @@
+appId: org.wikipedia.alpha
+---
+# Android — Disambiguation page resolution (article-footer "Similar pages")
+#
+# Parity flow for the feature that was previously missing on Android. It exercises the newly
+# implemented footer-driven candidate-list shortcut that mirrors iOS's DisambiguationPagesViewController:
+#
+#   * JavaScriptActionHandler.setFooter() now requests pcs.c1.Footer.MenuItemType.disambiguation,
+#     so the Page Content Service renders a "Similar pages" row in the "About this article" footer
+#     menu of any article that actually carries disambiguation / hatnote links (e.g. "Mercury (planet)").
+#   * PageFragment's "disambiguation" footer_item handler flattens the payload's grouped `links` into
+#     an ordered, de-duplicated list of candidate URLs and launches DisambiguationActivity.
+#   * DisambiguationActivity ("Similar pages") fetches a summary per candidate and renders
+#     title + description + thumbnail PageItemView rows. Tapping a candidate opens it in the reader.
+#
+# Platform difference vs iOS: iOS pushes the list onto a nav stack so Back returns to the list.
+# Android reads every article through a single `singleTask` PageActivity + internal tab back-stack,
+# so opening a candidate from the footer-launched list reuses the reader and Back returns to the
+# reader/source article — identical to every other list-to-article path in the app.
+#
+# Navigation: fresh launch -> onboarding -> Explore -> Search "Mercury planet" -> open
+#             "Mercury (planet)" -> Contents TOC -> "About this article" (jumps to footer) ->
+#             "Similar pages" row -> DisambiguationActivity list -> tap candidate -> reader.
+#
+# Screenshots are written to android/.maestro/artifacts/. NOTE: some Maestro takeScreenshot frames
+# can freeze on this emulator during WebView/drawer transitions; reliable stills for the PR are
+# captured via `adb screencap` alongside this run.
+
+- launchApp:
+    clearState: true
+- waitForAnimationToEnd:
+    timeout: 8000
+
+# Onboarding: advance through the intro screens, then Skip topic selection to reach Explore.
+- extendedWaitUntil:
+    visible:
+      text: "Forward"
+    timeout: 20000
+- repeat:
+    times: 6
+    commands:
+      - tapOn:
+          text: "Forward"
+          optional: true
+      - waitForAnimationToEnd
+- extendedWaitUntil:
+    visible:
+      text: "Skip"
+    timeout: 10000
+- tapOn:
+    text: "Skip"
+- waitForAnimationToEnd:
+    timeout: 6000
+
+# Dismiss a possible runtime notifications permission dialog (Android 13+).
+- tapOn:
+    text: "Allow|While using the app|Don.t allow|No thanks|OK"
+    optional: true
+- waitForAnimationToEnd
+
+- assertVisible:
+    id: "org.wikipedia.alpha:id/nav_tab_search"
+
+# =========================================================================
+# 1) Search for a stable article that carries disambiguation hatnotes:
+#    "Mercury (planet)".
+# =========================================================================
+- tapOn:
+    text: "Search"
+- waitForAnimationToEnd
+- tapOn:
+    text: "Search Wikipedia"
+- waitForAnimationToEnd
+- inputText: "Mercury planet"
+- waitForAnimationToEnd:
+    timeout: 6000
+# Regex parentheses are escaped because Maestro matches text as a regular expression.
+- extendedWaitUntil:
+    visible:
+      text: "Mercury \\(planet\\)"
+    timeout: 15000
+- takeScreenshot:
+    path: /Users/kevingalligan/.portive/sync/checkouts/team-1/android/.maestro/artifacts/android_disambiguation_01_search_results
+
+# =========================================================================
+# 2) Open the article reader.
+# =========================================================================
+- tapOn:
+    text: "Mercury \\(planet\\)"
+- waitForAnimationToEnd:
+    timeout: 4000
+# Dismiss any first-run promos / tooltips that can overlay a freshly opened article:
+# the "Introducing Wikipedia games" dialog (id/closeButton, "Close") and the
+# "Customize your toolbar" coach mark ("Got it"). These are optional / one-off.
+- repeat:
+    times: 3
+    commands:
+      - tapOn:
+          id: "org.wikipedia.alpha:id/closeButton"
+          optional: true
+      - tapOn:
+          text: "Got it"
+          optional: true
+      - waitForAnimationToEnd
+# The article WebView reports no resource-id to the accessibility tree, so confirm the reader
+# via its native bottom action bar ("Contents") and the rendered article title.
+- extendedWaitUntil:
+    visible:
+      text: "Contents"
+    timeout: 20000
+- extendedWaitUntil:
+    visible:
+      text: "Mercury \\(planet\\)"
+    timeout: 20000
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot:
+    path: /Users/kevingalligan/.portive/sync/checkouts/team-1/android/.maestro/artifacts/android_disambiguation_02_article_top
+
+# =========================================================================
+# 3) Reach the footer "About this article" menu via the Contents table of
+#    contents, which carries an "About this article" entry that jumps straight
+#    to the footer (mirrors the iOS TOC path) instead of manually scrolling this
+#    very long featured article. Because "Mercury (planet)" carries disambiguation
+#    hatnotes, PCS renders the new "Similar pages" row alongside the other footer
+#    items — its presence is the regression check for the setFooter() change.
+# =========================================================================
+- tapOn:
+    text: "Contents"
+- waitForAnimationToEnd:
+    timeout: 2000
+- tapOn:
+    text: "About this article"
+- waitForAnimationToEnd:
+    timeout: 3000
+- extendedWaitUntil:
+    visible:
+      text: "Similar pages"
+    timeout: 15000
+- assertVisible:
+    text: "Similar pages"
+- takeScreenshot:
+    path: /Users/kevingalligan/.portive/sync/checkouts/team-1/android/.maestro/artifacts/android_disambiguation_03_footer_similar_pages_item
+
+# =========================================================================
+# 4) Tap "Similar pages" -> DisambiguationActivity. Its toolbar title is
+#    "Similar pages" and it lists the fetched candidate summaries
+#    (title + description + thumbnail).
+# =========================================================================
+- tapOn:
+    text: "Similar pages"
+- extendedWaitUntil:
+    visible:
+      text: "Atmosphere of Mercury"
+    timeout: 20000
+- waitForAnimationToEnd:
+    timeout: 2000
+- assertVisible:
+    text: "Similar pages"
+- assertVisible:
+    text: "Atmosphere of Mercury"
+- takeScreenshot:
+    path: /Users/kevingalligan/.portive/sync/checkouts/team-1/android/.maestro/artifacts/android_disambiguation_04_similar_pages_list
+
+# =========================================================================
+# 5) Tap a candidate (a native PageItemView row in DisambiguationActivity) ->
+#    opens that article in the reader. This is the resolution step: selecting
+#    one of the similar pages opens it. The reader-only bottom action bar
+#    ("Contents") confirms we left the list and entered the reader.
+# =========================================================================
+- tapOn:
+    text: "Atmosphere of Mercury"
+- extendedWaitUntil:
+    visible:
+      text: "Contents"
+    timeout: 20000
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot:
+    path: /Users/kevingalligan/.portive/sync/checkouts/team-1/android/.maestro/artifacts/android_disambiguation_05_candidate_article_opened
+
+# =========================================================================
+# 6) Back -> returns to the article reader. NOTE ON PLATFORM DIFFERENCE:
+#    iOS pushes the "Similar pages" list onto a navigation stack, so Back there
+#    returns to the list. Android drives all article reading through a single
+#    `singleTask` PageActivity with an internal tab back-stack; because
+#    DisambiguationActivity is launched from the article footer (with that
+#    PageActivity beneath it), opening a candidate reuses the reader and Back
+#    returns to the reader / source article — the same behavior as every other
+#    list-to-article path in the app (Places, On this day, News, feed, search).
+# =========================================================================
+- back
+- extendedWaitUntil:
+    visible:
+      text: "Contents"
+    timeout: 15000
+- waitForAnimationToEnd:
+    timeout: 2000
+- assertVisible:
+    text: "Contents"
+- takeScreenshot:
+    path: /Users/kevingalligan/.portive/sync/checkouts/team-1/android/.maestro/artifacts/android_disambiguation_06_back_to_reader

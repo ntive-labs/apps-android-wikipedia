@@ -87,6 +87,7 @@ import org.wikipedia.navtab.NavTab
 import org.wikipedia.notifications.PollNotificationWorker
 import org.wikipedia.page.action.PageActionItem
 import org.wikipedia.page.campaign.CampaignDialog
+import org.wikipedia.page.disambiguation.DisambiguationActivity
 import org.wikipedia.page.edithistory.EditHistoryListActivity
 import org.wikipedia.page.issues.PageIssuesDialog
 import org.wikipedia.page.leadimages.LeadImagesHandler
@@ -893,8 +894,19 @@ class PageFragment : Fragment(), BackPressedHandler, CommunicationBridge.Communi
                         }
                     }
                     "disambiguation" -> {
-                        // TODO
-                        // messagePayload contains an array of URLs called "payload".
+                        val array = payload["payload"]
+                        if (array != null && array.jsonArray.isNotEmpty() && model.title != null) {
+                            // The payload is an array of groups, each with a "links" array of
+                            // absolute article URLs. Flatten them into a single, de-duplicated,
+                            // order-preserving list of candidate URLs (mirrors iOS showDisambiguation()).
+                            val urls = array.jsonArray
+                                .flatMap { it.jsonObject["links"]?.jsonArray.orEmpty() }
+                                .map { it.jsonPrimitive.content }
+                                .distinct()
+                            if (urls.isNotEmpty()) {
+                                startActivity(DisambiguationActivity.newIntent(requireContext(), model.title!!.wikiSite, urls))
+                            }
+                        }
                     }
                 }
             }
