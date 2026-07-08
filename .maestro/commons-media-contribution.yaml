@@ -1,0 +1,106 @@
+appId: org.wikipedia.alpha
+---
+# Android — Commons media caption & depicts-tag contribution prompts (source of truth for plan #3)
+#
+# Captures Android's FilePageFragment, the reference implementation the iOS port targets.
+# From the image gallery, the overflow "Go to image page" opens FilePageActivity, whose
+# FilePageView shows contribution CTAs for eligible Commons files:
+#   * "Add image caption"  -> DescriptionEditActivity (Action.ADD_CAPTION, wbsetlabel)
+#   * "Add image tags"     -> SuggestedEditsImageTagEditActivity (wbeditentity, P180 depicts)
+# (FilePageViewModel.loadImageInfo + FilePageView.setup; strings file_page_add_image_*_button.)
+#
+# Navigation: onboarding -> Search "Albert Einstein" -> article -> lead image -> Gallery
+#             -> overflow "Go to image page" -> File page CTAs -> Add image tags editor.
+
+- launchApp:
+    clearState: true
+- waitForAnimationToEnd:
+    timeout: 8000
+
+# Onboarding: advance through intro screens, then Skip topic selection.
+- extendedWaitUntil:
+    visible:
+      text: "Forward"
+    timeout: 20000
+- repeat:
+    times: 6
+    commands:
+      - tapOn:
+          text: "Forward"
+          optional: true
+      - waitForAnimationToEnd
+- extendedWaitUntil:
+    visible:
+      text: "Skip"
+    timeout: 10000
+- tapOn:
+    text: "Skip"
+- waitForAnimationToEnd:
+    timeout: 6000
+- tapOn:
+    text: "Allow|While using the app|Don.t allow|No thanks|OK"
+    optional: true
+- waitForAnimationToEnd
+
+# Search -> Albert Einstein article
+- tapOn:
+    text: "Search"
+- waitForAnimationToEnd
+- tapOn:
+    text: "Search Wikipedia"
+- waitForAnimationToEnd
+- inputText: "Albert Einstein"
+- waitForAnimationToEnd:
+    timeout: 6000
+- tapOn:
+    text: "German-born theoretical physicist.*"
+- waitForAnimationToEnd
+- tapOn:
+    id: "org.wikipedia.alpha:id/closeButton"
+    optional: true
+- tapOn:
+    text: "Got it"
+    optional: true
+- waitForAnimationToEnd
+
+# Open the gallery via the lead-image header
+- extendedWaitUntil:
+    visible:
+      id: "org.wikipedia.alpha:id/view_page_header_image"
+    timeout: 20000
+- tapOn:
+    id: "org.wikipedia.alpha:id/view_page_header_image"
+- waitForAnimationToEnd:
+    timeout: 6000
+- takeScreenshot:
+    path: /Users/kevingalligan/.portive/sync/checkouts/team-1/android/.maestro/artifacts/plan-3-android-01-gallery-opened
+
+# Overflow menu -> "Go to image page" -> FilePageActivity
+- tapOn:
+    text: "More options"
+    optional: true
+- waitForAnimationToEnd:
+    timeout: 2000
+- tapOn:
+    text: "Go to image page"
+# FilePageFragment loads Commons imageinfo/entityterms + protection + P180 depicts.
+- extendedWaitUntil:
+    visible:
+      text: "File from Wikimedia Commons"
+    timeout: 20000
+- waitForAnimationToEnd:
+    timeout: 3000
+# The file page: structured caption + depicts tags + edit affordance for eligible files.
+# For a file with existing metadata it shows the values + an edit pencil; for a file
+# missing metadata it shows "Add image caption" / "Add image tags" CTAs.
+- takeScreenshot:
+    path: /Users/kevingalligan/.portive/sync/checkouts/team-1/android/.maestro/artifacts/plan-3-android-02-file-page
+
+# Open the caption editor via the edit pencil (DescriptionEditActivity, Action.ADD_CAPTION)
+- tapOn:
+    id: "org.wikipedia.alpha:id/editButton"
+    optional: true
+- waitForAnimationToEnd:
+    timeout: 6000
+- takeScreenshot:
+    path: /Users/kevingalligan/.portive/sync/checkouts/team-1/android/.maestro/artifacts/plan-3-android-03-caption-editor
