@@ -1,0 +1,140 @@
+appId: org.wikipedia.alpha
+# Android: Disambiguation page resolution -- the "Similar pages" footer shortcut.
+#
+# Brings Android to parity with iOS's "Disambiguation page resolution" feature
+# (ios/Wikipedia/Code/DisambiguationPagesViewController.swift +
+#  ArticleViewController+ArticleInformation.swift showDisambiguation(with:)).
+#
+# This flow exercises the whole ported path end to end:
+#   1. Open a disambiguation-bearing article ("Mercury (planet)").
+#   2. Scroll to the "About this article" footer and confirm the PageContentService
+#      "Similar pages" row now renders -- this row's presence is the regression check
+#      for JavaScriptActionHandler.setFooter() requesting MenuItemType.disambiguation.
+#   3. Tap it to open the new DisambiguationActivity ("Similar pages"), which parses the
+#      footer payload's grouped { "links": [...] } candidates, fetches an article summary
+#      per candidate, and renders title + description + thumbnail rows (PageItemView) --
+#      mirroring iOS's ArticleRightAlignedImageCollectionViewCell list.
+#   4. Tap a candidate ("Atmosphere of Mercury") to open it in the article reader for
+#      continued reading (PageActivity.newIntentForNewTab, the app's standard new-tab
+#      navigation used by every other footer/list screen).
+#
+# Source under ./android:
+#   bridge/JavaScriptActionHandler.kt          -- setFooter() adds MenuItemType.disambiguation
+#   page/PageFragment.kt                       -- "disambiguation" footer_item handler ->
+#                                                 flattens payload -> DisambiguationActivity
+#   page/disambiguation/DisambiguationActivity.kt / DisambiguationViewModel.kt
+#   res/layout/activity_disambiguation.xml     -- disambig_toolbar_title / disambig_recycler
+#
+# Screenshots are written to .maestro/artifacts/.
+---
+- launchApp:
+    clearState: true
+- waitForAnimationToEnd:
+    timeout: 8000
+
+# Onboarding: advance the intro pager, then skip topic selection.
+- extendedWaitUntil:
+    visible:
+      text: "Forward"
+    timeout: 20000
+    optional: true
+- repeat:
+    times: 6
+    commands:
+      - tapOn:
+          text: "Forward"
+          optional: true
+      - waitForAnimationToEnd
+- tapOn:
+    text: "Skip"
+    optional: true
+- waitForAnimationToEnd:
+    timeout: 6000
+
+# Dismiss the Android 13+ runtime notifications permission dialog if shown.
+- tapOn:
+    text: "Allow|While using the app|Don.t allow|No thanks|OK"
+    optional: true
+- waitForAnimationToEnd
+
+# --- Open the disambiguation-bearing article: Search -> Mercury (planet) ---
+- tapOn:
+    id: "org.wikipedia.alpha:id/nav_tab_search"
+- waitForAnimationToEnd:
+    timeout: 3000
+- tapOn:
+    id: "org.wikipedia.alpha:id/search_card"
+- waitForAnimationToEnd:
+    timeout: 3000
+- inputText: "Mercury planet"
+- waitForAnimationToEnd:
+    timeout: 6000
+- tapOn:
+    text: "Mercury \\(planet\\)"
+- waitForAnimationToEnd:
+    timeout: 8000
+
+# Dismiss first-run promos / coachmarks that can overlay the freshly loaded article.
+- tapOn:
+    id: "org.wikipedia.alpha:id/closeButton"
+    optional: true
+- waitForAnimationToEnd
+- tapOn:
+    text: "Got it"
+    optional: true
+- waitForAnimationToEnd:
+    timeout: 3000
+
+# --- Reach the article footer ("About this article") by scrolling the reader WebView ---
+- repeat:
+    times: 60
+    commands:
+      - swipe:
+          start: "50%,85%"
+          end: "50%,15%"
+          duration: 80
+- extendedWaitUntil:
+    visible:
+      text: "Similar pages"
+    timeout: 8000
+# Step 1 regression check: the PCS footer now renders the "Similar pages" row.
+- assertVisible:
+    text: "Similar pages"
+- takeScreenshot:
+    path: /Users/kevingalligan/.portive/sync/checkouts/team-1/android/.maestro/artifacts/android_disambiguation_01_footer_similar_pages
+
+# --- Open the "Similar pages" list screen (DisambiguationActivity) ---
+- tapOn:
+    text: "Similar pages"
+- waitForAnimationToEnd:
+    timeout: 6000
+- assertVisible:
+    id: "org.wikipedia.alpha:id/disambig_toolbar_title"
+- assertVisible:
+    text: "Atmosphere of Mercury"
+- assertVisible:
+    text: "MESSENGER"
+- takeScreenshot:
+    path: /Users/kevingalligan/.portive/sync/checkouts/team-1/android/.maestro/artifacts/android_disambiguation_02_similar_pages_list
+
+# --- Open a candidate in the reader for continued reading ---
+- tapOn:
+    text: "Atmosphere of Mercury"
+- waitForAnimationToEnd:
+    timeout: 8000
+- tapOn:
+    id: "org.wikipedia.alpha:id/closeButton"
+    optional: true
+- tapOn:
+    text: "Got it"
+    optional: true
+- waitForAnimationToEnd:
+    timeout: 3000
+- extendedWaitUntil:
+    visible:
+      text: "Gas layer surrounding planet Mercury"
+    timeout: 15000
+- assertVisible:
+    text: "Atmosphere of Mercury"
+- takeScreenshot:
+    path: /Users/kevingalligan/.portive/sync/checkouts/team-1/android/.maestro/artifacts/android_disambiguation_03_candidate_article

@@ -127,8 +127,10 @@ object JavaScriptActionHandler {
         val editedDaysAgo = TimeUnit.MILLISECONDS.toDays(Date().time - model.page!!.pageProperties.lastModified.time)
         val langCode = model.title?.wikiSite?.languageCode ?: WikipediaApp.instance.appOrSystemLanguageCode
 
-        // TODO: page-library also supports showing disambiguation ("similar pages") links and
-        // "page issues". We should be mindful that they exist, even if we don't want them for now.
+        // Both "page issues" and disambiguation ("similar pages") rows are rendered by
+        // page-library only when the article actually carries the corresponding links, so
+        // requesting them here is inert for every other article. This mirrors iOS, which
+        // always lists .pageIssues and .disambiguation in its footer menu.
         return "pcs.c1.Footer.add({" +
                 "   platform: \"android\"," +
                 "   clientVersion: \"${BuildConfig.VERSION_NAME}\"," +
@@ -138,6 +140,7 @@ object JavaScriptActionHandler {
                                 (if (showTalkLink) "pcs.c1.Footer.MenuItemType.talkPage, " else "") +
                                 (if (showMapLink) "pcs.c1.Footer.MenuItemType.coordinate, " else "") +
                                 "pcs.c1.Footer.MenuItemType.pageIssues, " +
+                                "pcs.c1.Footer.MenuItemType.disambiguation, " +
                 "               pcs.c1.Footer.MenuItemType.referenceList " +
                 "              ]," +
                 "       fragment: \"pcs-menu\"," +

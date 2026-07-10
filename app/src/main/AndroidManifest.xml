@@ -279,6 +279,9 @@
         <activity
             android:name=".categories.CategoryActivity" />
 
+        <activity
+            android:name=".page.disambiguation.DisambiguationActivity" />
+
         <activity android:name=".suggestededits.SuggestedEditsImageTagsOnboardingActivity" />
 
         <activity android:name=".suggestededits.SuggestedEditsImageRecsOnboardingActivity" />
