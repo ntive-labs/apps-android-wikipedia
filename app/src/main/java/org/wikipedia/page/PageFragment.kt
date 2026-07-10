@@ -39,6 +39,7 @@ import com.google.android.material.textview.MaterialTextView
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.float
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
@@ -87,6 +88,7 @@ import org.wikipedia.navtab.NavTab
 import org.wikipedia.notifications.PollNotificationWorker
 import org.wikipedia.page.action.PageActionItem
 import org.wikipedia.page.campaign.CampaignDialog
+import org.wikipedia.page.disambiguation.DisambiguationActivity
 import org.wikipedia.page.edithistory.EditHistoryListActivity
 import org.wikipedia.page.issues.PageIssuesDialog
 import org.wikipedia.page.leadimages.LeadImagesHandler
@@ -893,8 +895,20 @@ class PageFragment : Fragment(), BackPressedHandler, CommunicationBridge.Communi
                         }
                     }
                     "disambiguation" -> {
-                        // TODO
-                        // messagePayload contains an array of URLs called "payload".
+                        // The payload is an array of groups, each carrying a "links" array of
+                        // candidate article URLs. Flatten them into a single ordered, de-duplicated
+                        // list and open the "Similar pages" screen, mirroring iOS's showDisambiguation().
+                        val groups = payload["payload"]
+                        if (groups != null && groups.jsonArray.isNotEmpty() && model.title != null) {
+                            val urls = groups.jsonArray
+                                .flatMap { it.jsonObject["links"]?.jsonArray.orEmpty() }
+                                .mapNotNull { it.jsonPrimitive.contentOrNull }
+                                .distinct()
+                            if (urls.isNotEmpty()) {
+                                articleInteractionEvent?.logSimilarPagesClick()
+                                startActivity(DisambiguationActivity.newIntent(requireContext(), model.title!!.wikiSite, urls))
+                            }
+                        }
                     }
                 }
             }

@@ -81,6 +81,10 @@ class ArticleInteractionEvent(private val wikiDb: String, private val pageId: In
         submitEvent("talk_page_from_article")
     }
 
+    fun logSimilarPagesClick() {
+        submitEvent("similar_page")
+    }
+
     fun logTocSwipe() {
         submitEvent("toc_swipe")
     }
