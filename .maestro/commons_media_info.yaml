@@ -1,0 +1,84 @@
+# Maestro flow: Commons media caption & image-tag contribution prompts (Android, source of truth).
+#
+# Parallels the iOS flow (wikipedia-ios/.maestro/commons_media_info.yaml). Opens the existing
+# FilePage from the article image gallery ("Go to image page") and captures the caption + image
+# tag contribution surface that the iOS port now mirrors.
+#
+# Run: maestro test .maestro/commons_media_info.yaml
+appId: org.wikipedia.dev
+name: Commons Media Info - caption & image tags (Android)
+tags:
+  - android
+  - commons-media-info
+---
+- launchApp:
+    appId: org.wikipedia.dev
+    clearState: true
+
+# Dismiss first-run onboarding if present.
+- repeat:
+    while:
+      visible:
+        text: "Forward"
+    commands:
+      - tapOn:
+          text: "Forward"
+- runFlow:
+    when:
+      visible: "Skip"
+    commands:
+      - tapOn: "Skip"
+
+# Search for an article with a rich image gallery.
+- tapOn:
+    id: "org.wikipedia.dev:id/nav_tab_search"
+    optional: true
+- tapOn:
+    id: "org.wikipedia.dev:id/search_card"
+- inputText: "Dog"
+- extendedWaitUntil:
+    visible: "Domesticated species of canid"
+    timeout: 15000
+- tapOn: "Domesticated species of canid"
+- waitForAnimationToEnd
+
+# Dismiss any post-open promos (Year in Review / Wikipedia games / toolbar tooltip).
+- runFlow:
+    when:
+      visible: "Get started"
+    commands:
+      - tapOn:
+          point: "6%,8%"
+- runFlow:
+    when:
+      visible:
+        id: "org.wikipedia.dev:id/closeButton"
+    commands:
+      - tapOn:
+          id: "org.wikipedia.dev:id/closeButton"
+- runFlow:
+    when:
+      visible: "Got it"
+    commands:
+      - tapOn: "Got it"
+- waitForAnimationToEnd
+
+# Open the lead image gallery.
+- tapOn:
+    point: "50%,25%"
+- waitForAnimationToEnd
+
+# Open the file page via the gallery overflow menu -> "Go to image page".
+- tapOn:
+    point: "95%,11%"
+- extendedWaitUntil:
+    visible: "Go to image page"
+    timeout: 8000
+- tapOn: "Go to image page"
+
+# The FilePage shows the Commons caption + depicts image tags (the surface iOS now mirrors).
+- extendedWaitUntil:
+    visible: "Image tags"
+    timeout: 15000
+- assertVisible: "Image caption (English)"
+- takeScreenshot: .maestro/screenshots/plan3-android-01-file-page
