@@ -70,7 +70,7 @@ object ServiceFactory {
 
     fun getRestBasePath(wiki: WikiSite): String {
         var path = if (Prefs.restbaseUriFormat.isEmpty()) wiki.url() + "/" + RestService.REST_API_PREFIX
-        else String.format(Prefs.restbaseUriFormat, "https", wiki.authority())
+        else String.format(Prefs.restbaseUriFormat, wiki.scheme(), wiki.authority())
         if (!path.endsWith("/")) {
             path += "/"
         }
