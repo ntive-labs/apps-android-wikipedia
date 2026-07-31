@@ -1,0 +1,25 @@
+appId: org.wikipedia.dev
+name: "TC2 set 0 - Login completes after answering a CAPTCHA challenge"
+tags:
+  - android
+  - login
+  - captcha
+env:
+  # Overridable from the CLI: maestro test ... -e SHOTS=/abs/path
+  SHOTS: ".maestro/screenshots"
+---
+# Parameter set 0 of test case 2.
+#   username = maestro-user
+#   password = correct-horse-battery
+#
+# The mock server must be started with the same credentials, e.g.
+#   MOCK_USERNAME=maestro-user MOCK_PASSWORD=correct-horse-battery \
+#   MOCK_CAPTCHA_ANSWER=WIKI42 python3 .maestro/mock/captcha_login_server.py
+- runFlow:
+    file: tc-2-login-with-captcha.yaml
+    env:
+      SHOTS: "${SHOTS}"
+      SET_INDEX: "0"
+      USERNAME: "maestro-user"
+      PASSWORD: "correct-horse-battery"
+      CAPTCHA_ANSWER: "WIKI42"

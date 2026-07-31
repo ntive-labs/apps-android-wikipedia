@@ -1,0 +1,321 @@
+appId: org.wikipedia.dev
+name: "TC2 - Login completes after answering a CAPTCHA challenge"
+tags:
+  - android
+  - login
+  - captcha
+env:
+  # Parameter set values. Overridden per set by the tc-2-login-with-captcha-set<N>.yaml wrappers.
+  USERNAME: "maestro-user"
+  PASSWORD: "correct-horse-battery"
+  SET_INDEX: "0"
+  # Not a test-case parameter: the word the mock server draws into the CAPTCHA image.
+  # Must match MOCK_CAPTCHA_ANSWER given to .maestro/mock/captcha_login_server.py.
+  CAPTCHA_ANSWER: "WIKI42"
+  # Where the screenshot series is written, relative to the repo root (git-ignored).
+  SHOTS: ".maestro/screenshots"
+  # Mock backend, as seen from the emulator (10.0.2.2 is the host loopback alias).
+  API_BASE_URL: "http://10.0.2.2:8080"
+---
+# =============================================================================
+# Test case 2: Login completes after answering a CAPTCHA challenge
+# User story: "Answer CAPTCHA Challenge during Login"
+#
+# GIVEN
+#   G0  The user is signed out
+#   G1  The login API is mocked to require an image CAPTCHA challenge before
+#       completing sign-in
+# WHEN
+#   W0  Enter the username {username} and password {password}
+#   W1  Submit the login form
+#   W2  Type the CAPTCHA answer into the challenge field
+#   W3  Submit the login form again
+# THEN
+#   T0  The CAPTCHA image and answer field are shown after the first submit
+#   T1  Login completes and the app shows the signed-in state
+#
+# Start screen: the Login screen (LoginActivity).
+#
+# HOW TO RUN
+#   1. Start the mock backend on the host:
+#        MOCK_USERNAME=maestro-user \
+#        MOCK_PASSWORD=correct-horse-battery \
+#        MOCK_CAPTCHA_ANSWER=WIKI42 \
+#        python3 .maestro/mock/captcha_login_server.py
+#   2. Install a *debug* build (the launch-arg seam is gated on BuildConfig.DEBUG):
+#        ./gradlew assembleDevDebug && adb install -r app/build/outputs/apk/dev/debug/app-dev-debug.apk
+#   3. maestro test .maestro/tc-2-login-with-captcha-set0.yaml
+#   Or just: .maestro/run-tc-2.sh   (does all of the above, once per parameter set)
+#
+# Screenshots land in .maestro/screenshots/ as tc-2-set<S>-start.png,
+# tc-2-set<S>-when<W>-before.png and tc-2-set<S>-when<W>-after.png.
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# GIVEN G1 - the login API is mocked to require an image CAPTCHA challenge.
+#
+# AppConfig.applyLaunchOverrides() (debug-only) reads these launcher-intent extras and repoints
+# the home wiki's Action API / REST v1 / Core REST at the mock. The mock answers the first
+# action=clientlogin with status FAIL, then serves a captchaId from
+# meta=authmanagerinfo&amirequestsfor=login, which is exactly what makes LoginClient raise the
+# FancyCaptcha UI prompt. The second clientlogin - the one carrying captchaId + captchaWord -
+# returns status PASS.
+# -----------------------------------------------------------------------------
+- launchApp:
+    clearState: true
+    permissions:
+      # Pre-grant notifications: the app asks for POST_NOTIFICATIONS both during onboarding and
+      # again right after a successful login, and that system dialog would otherwise cover the
+      # screen the flow is asserting on.
+      all: deny
+      notifications: allow
+    arguments:
+      apiBaseUrl: "${API_BASE_URL}"
+      disableCertPinning: true
+    label: "GIVEN G1: launch pointed at the CAPTCHA-requiring mock login API"
+- waitForAnimationToEnd:
+    timeout: 10000
+
+# A cleared app shows the intro pager; Android 13+ also raises the notifications permission
+# dialog part-way through it. Dismiss both, best-effort, then wait for the main screen.
+- repeat:
+    times: 8
+    commands:
+      - tapOn:
+          text: "Don.t allow|Allow|While using the app|No thanks"
+          optional: true
+      - tapOn:
+          text: "Forward"
+          optional: true
+      - waitForAnimationToEnd:
+          timeout: 2500
+- tapOn:
+    text: "Don.t allow|Allow|While using the app|No thanks"
+    optional: true
+- tapOn:
+    text: "Skip"
+    optional: true
+- extendedWaitUntil:
+    visible:
+      id: "org.wikipedia.dev:id/nav_tab_more"
+    timeout: 30000
+    label: "Onboarding dismissed, main screen reached"
+
+# -----------------------------------------------------------------------------
+# GIVEN G0 - the user is signed out.
+#
+# `clearState` wipes app data but NOT the AccountManager account the app creates on login, so a
+# previous run can leave the device signed in. Open the More menu and, only if an account is
+# still present, sign out through Settings before continuing.
+# -----------------------------------------------------------------------------
+- tapOn:
+    id: "org.wikipedia.dev:id/nav_tab_more"
+- waitForAnimationToEnd:
+    timeout: 4000
+- runFlow:
+    when:
+      visible:
+        id: "org.wikipedia.dev:id/main_drawer_account_name"
+    label: "GIVEN G0: sign out the account left behind by an earlier run"
+    commands:
+      - tapOn:
+          id: "org.wikipedia.dev:id/main_drawer_settings_container"
+      - waitForAnimationToEnd:
+          timeout: 5000
+      - scrollUntilVisible:
+          element:
+            id: "org.wikipedia.dev:id/logoutButton"
+          direction: DOWN
+          timeout: 20000
+      - tapOn:
+          id: "org.wikipedia.dev:id/logoutButton"
+      - waitForAnimationToEnd:
+          timeout: 3000
+      # Confirmation dialog: "This will log you out on all devices ..." -> positive button.
+      - tapOn:
+          id: "android:id/button1"
+      - extendedWaitUntil:
+          visible:
+            id: "org.wikipedia.dev:id/nav_tab_more"
+          timeout: 20000
+      - tapOn:
+          id: "org.wikipedia.dev:id/nav_tab_more"
+      - waitForAnimationToEnd:
+          timeout: 4000
+
+# G0 is now guaranteed: the More menu offers "Log in / join Wikipedia" and shows no account.
+- assertVisible:
+    id: "org.wikipedia.dev:id/main_drawer_login_button"
+    label: "GIVEN G0 verified: signed out (menu offers log in)"
+- assertNotVisible:
+    id: "org.wikipedia.dev:id/main_drawer_account_name"
+    label: "GIVEN G0 verified: no signed-in account name"
+
+# -----------------------------------------------------------------------------
+# Navigate to the start screen: the Login screen.
+#
+# LoginActivity always pushes CreateAccountActivity on top first (CREATE_ACCOUNT_FIRST defaults
+# to true), so step through it via its "Log in" button to land on the login form itself.
+# -----------------------------------------------------------------------------
+- tapOn:
+    id: "org.wikipedia.dev:id/main_drawer_account_container"
+- extendedWaitUntil:
+    visible:
+      id: "org.wikipedia.dev:id/create_account_login_button"
+    timeout: 20000
+- tapOn:
+    id: "org.wikipedia.dev:id/create_account_login_button"
+- extendedWaitUntil:
+    visible:
+      id: "org.wikipedia.dev:id/login_button"
+    timeout: 20000
+    label: "Start screen reached: Login screen"
+- assertVisible:
+    id: "org.wikipedia.dev:id/login_username_text"
+- assertVisible:
+    id: "org.wikipedia.dev:id/login_password_input"
+- assertNotVisible:
+    id: "org.wikipedia.dev:id/captcha_image"
+    label: "No CAPTCHA yet on the pristine login form"
+- waitForAnimationToEnd:
+    timeout: 2000
+
+# START STATE - every Given holds and the start screen is visible.
+- takeScreenshot:
+    path: "${SHOTS}/tc-2-set${SET_INDEX}-start"
+
+# =============================================================================
+# WHEN W0 - Enter the username {username} and password {password}
+# =============================================================================
+- takeScreenshot:
+    path: "${SHOTS}/tc-2-set${SET_INDEX}-when0-before"
+- tapOn:
+    id: "org.wikipedia.dev:id/login_username_text"
+- inputText: "${USERNAME}"
+- hideKeyboard
+- tapOn:
+    id: "org.wikipedia.dev:id/login_password_input"
+- inputText: "${PASSWORD}"
+- hideKeyboard
+- waitForAnimationToEnd:
+    timeout: 2000
+- assertVisible:
+    text: "${USERNAME}"
+    label: "WHEN W0: username entered"
+- takeScreenshot:
+    path: "${SHOTS}/tc-2-set${SET_INDEX}-when0-after"
+
+# =============================================================================
+# WHEN W1 - Submit the login form
+# =============================================================================
+- takeScreenshot:
+    path: "${SHOTS}/tc-2-set${SET_INDEX}-when1-before"
+- tapOn:
+    id: "org.wikipedia.dev:id/login_button"
+    label: "WHEN W1: submit the login form"
+- extendedWaitUntil:
+    visible:
+      id: "org.wikipedia.dev:id/captcha_image"
+    timeout: 25000
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot:
+    path: "${SHOTS}/tc-2-set${SET_INDEX}-when1-after"
+
+# -----------------------------------------------------------------------------
+# THEN T0 - The CAPTCHA image and answer field are shown after the first submit.
+#
+# Asserted here, at the only point in the flow where this state exists: the challenge is
+# consumed by W3 and the whole screen is gone once login completes.
+# -----------------------------------------------------------------------------
+- assertVisible:
+    id: "org.wikipedia.dev:id/captcha_image"
+    label: "THEN T0: CAPTCHA image is shown after the first submit"
+- assertVisible:
+    id: "org.wikipedia.dev:id/captcha_text"
+    label: "THEN T0: CAPTCHA answer field is shown after the first submit"
+- assertVisible:
+    text: "To help protect against automated spam, please enter the words that appear below"
+    label: "THEN T0: CAPTCHA prompt copy is shown"
+- assertVisible:
+    id: "org.wikipedia.dev:id/login_button"
+    label: "THEN T0: still on the login screen, not signed in yet"
+
+# =============================================================================
+# WHEN W2 - Type the CAPTCHA answer into the challenge field
+# =============================================================================
+- takeScreenshot:
+    path: "${SHOTS}/tc-2-set${SET_INDEX}-when2-before"
+- tapOn:
+    id: "org.wikipedia.dev:id/captcha_text"
+# The word the mock renders into its Special:Captcha/image response.
+- inputText: "${CAPTCHA_ANSWER}"
+- hideKeyboard
+- waitForAnimationToEnd:
+    timeout: 2000
+- assertVisible:
+    text: "${CAPTCHA_ANSWER}"
+    label: "WHEN W2: CAPTCHA answer entered"
+- takeScreenshot:
+    path: "${SHOTS}/tc-2-set${SET_INDEX}-when2-after"
+
+# =============================================================================
+# WHEN W3 - Submit the login form again
+# =============================================================================
+- takeScreenshot:
+    path: "${SHOTS}/tc-2-set${SET_INDEX}-when3-before"
+- tapOn:
+    id: "org.wikipedia.dev:id/login_button"
+    label: "WHEN W3: submit the login form again, with the CAPTCHA answer"
+- waitForAnimationToEnd:
+    timeout: 4000
+# Safety net: on a device where notifications were never granted, the app re-asks for the
+# permission right after login and the system dialog covers the main screen.
+- runFlow:
+    when:
+      visible:
+        text: "Don.t allow|Allow|While using the app|No thanks"
+    commands:
+      - tapOn:
+          text: "Don.t allow|Allow|While using the app|No thanks"
+      - waitForAnimationToEnd:
+          timeout: 3000
+# LoginActivity finishes on success, dropping us back on the main screen.
+- extendedWaitUntil:
+    visible:
+      id: "org.wikipedia.dev:id/nav_tab_more"
+    timeout: 30000
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot:
+    path: "${SHOTS}/tc-2-set${SET_INDEX}-when3-after"
+
+# =============================================================================
+# THEN T1 - Login completes and the app shows the signed-in state.
+# =============================================================================
+- assertNotVisible:
+    id: "org.wikipedia.dev:id/captcha_image"
+    label: "THEN T1: CAPTCHA challenge is gone"
+- assertNotVisible:
+    id: "org.wikipedia.dev:id/login_username_text"
+    label: "THEN T1: login screen closed, i.e. login completed"
+
+# The signed-in state is what the More menu renders off AccountUtil.isLoggedIn: the account row
+# shows the user name and the "Log in / join Wikipedia" button is gone.
+- tapOn:
+    id: "org.wikipedia.dev:id/nav_tab_more"
+- waitForAnimationToEnd:
+    timeout: 4000
+- assertVisible:
+    id: "org.wikipedia.dev:id/main_drawer_account_name"
+    text: "${USERNAME}"
+    label: "THEN T1: signed-in state shows the account name"
+- assertNotVisible:
+    id: "org.wikipedia.dev:id/main_drawer_login_button"
+    label: "THEN T1: the log-in call to action is gone"
+# Signed-in-only destinations appear in the menu once an account is present.
+- assertVisible:
+    id: "org.wikipedia.dev:id/main_drawer_watchlist_container"
+    label: "THEN T1: signed-in-only menu entries are available"
+- takeScreenshot:
+    path: "${SHOTS}/tc-2-set${SET_INDEX}-signed-in-state"
