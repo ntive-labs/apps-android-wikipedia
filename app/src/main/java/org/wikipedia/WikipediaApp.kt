@@ -8,6 +8,7 @@ import android.os.Handler
 import android.speech.RecognizerIntent
 import android.webkit.WebView
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.net.toUri
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
@@ -32,6 +33,7 @@ import org.wikipedia.notifications.NotificationCategory
 import org.wikipedia.notifications.NotificationPollBroadcastReceiver
 import org.wikipedia.page.tabs.Tab
 import org.wikipedia.push.WikipediaFirebaseMessagingService
+import org.wikipedia.settings.AppConfig
 import org.wikipedia.settings.Prefs
 import org.wikipedia.theme.Theme
 import org.wikipedia.util.DimenUtil
@@ -107,8 +109,14 @@ class WikipediaApp : Application() {
         get() {
             // TODO: why don't we ensure that the app language hasn't changed here instead of the client?
             if (defaultWikiSite == null) {
-                val lang = if (Prefs.mediaWikiBaseUriSupportsLangCode) appOrSystemLanguageCode else ""
-                defaultWikiSite = WikiSite.forLanguageCode(lang)
+                defaultWikiSite = if (AppConfig.hasApiBaseUrlOverride) {
+                    // Debug-only test seam: route the home wiki straight at the mock host, preserving
+                    // its scheme (e.g. http) so plain-HTTP mock traffic is not forced back to https.
+                    WikiSite(AppConfig.apiBaseUrl.toUri(), appOrSystemLanguageCode)
+                } else {
+                    val lang = if (Prefs.mediaWikiBaseUriSupportsLangCode) appOrSystemLanguageCode else ""
+                    WikiSite.forLanguageCode(lang)
+                }
             }
             return defaultWikiSite!!
         }

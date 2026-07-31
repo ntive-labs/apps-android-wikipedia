@@ -34,6 +34,7 @@ import org.wikipedia.navtab.NavTab
 import org.wikipedia.onboarding.InitialOnboardingActivity
 import org.wikipedia.page.ExclusiveBottomSheetPresenter
 import org.wikipedia.page.PageActivity
+import org.wikipedia.settings.AppConfig
 import org.wikipedia.settings.Prefs
 import org.wikipedia.theme.Theme
 import org.wikipedia.util.DeviceUtil
@@ -65,6 +66,9 @@ class MainActivity : SingleFragmentActivity<MainFragment>(), MainFragment.Callba
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Debug-only test seam: apply any mock-backend launch overrides before the fragment (and its
+        // network calls) are created in super.onCreate(). No-op in release builds.
+        AppConfig.applyLaunchOverrides(intent)
         super.onCreate(savedInstanceState)
         if (!DeviceUtil.assertAppContext(this)) {
             return
