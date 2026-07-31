@@ -24,6 +24,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.drawWithContent
@@ -35,6 +36,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
@@ -82,6 +85,15 @@ fun Modifier.pulse(
         TransformOrigin(pivot, pivot)
     }
 }
+
+/**
+ * Publishes the [androidx.compose.ui.platform.testTag]s set anywhere in this subtree as Android
+ * resource ids, which is what lets UI automation (Maestro, UI Automator) address a composable by a
+ * stable id instead of by its user-visible, localized text. Apply once on the root of a Compose
+ * screen.
+ */
+@OptIn(ExperimentalComposeUiApi::class)
+fun Modifier.exposeTestTagsAsResourceIds(): Modifier = semantics { testTagsAsResourceId = true }
 
 fun Modifier.noRippleClickable(
     enabled: Boolean = true,

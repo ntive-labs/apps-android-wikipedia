@@ -1,0 +1,19 @@
+appId: org.wikipedia.dev
+name: "TC4 set 2 - Timeline module visibility persists"
+tags:
+  - android
+  - activity-tab
+  - customization
+---
+# Parameter set 2: {module} = "Timeline" -> ModuleType.TIMELINE ("Timeline of behavior").
+- runFlow:
+    file: tc-4-activity-tab-module-visibility.yaml
+    env:
+      MODULE: "Timeline"
+      MODULE_KEY: "timeline"
+      MODULE_SWITCH_TITLE: "Timeline of behavior"
+      SET_INDEX: "2"
+      USERNAME: "maestro-user"
+      PASSWORD: "correct-horse-battery"
+      SHOTS: ".maestro/screenshots"
+      API_BASE_URL: "http://10.0.2.2:8080"

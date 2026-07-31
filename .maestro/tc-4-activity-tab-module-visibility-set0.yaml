@@ -1,0 +1,19 @@
+appId: org.wikipedia.dev
+name: "TC4 set 0 - Impact module visibility persists"
+tags:
+  - android
+  - activity-tab
+  - customization
+---
+# Parameter set 0: {module} = "Impact" -> ModuleType.IMPACT ("All time impact").
+- runFlow:
+    file: tc-4-activity-tab-module-visibility.yaml
+    env:
+      MODULE: "Impact"
+      MODULE_KEY: "impact"
+      MODULE_SWITCH_TITLE: "All time impact"
+      SET_INDEX: "0"
+      USERNAME: "maestro-user"
+      PASSWORD: "correct-horse-battery"
+      SHOTS: ".maestro/screenshots"
+      API_BASE_URL: "http://10.0.2.2:8080"

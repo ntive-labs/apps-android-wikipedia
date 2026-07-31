@@ -1,0 +1,364 @@
+appId: org.wikipedia.dev
+name: "TC4 - Activity tab module visibility switches persist"
+tags:
+  - android
+  - activity-tab
+  - customization
+---
+# =============================================================================
+# Test case 4: Activity tab module visibility switches persist
+# User story: "Save Activity Tab Module visibility switches"
+#
+# GIVEN
+#   G0  The user is signed in
+#   G1  All Activity tab modules are enabled
+# WHEN
+#   W0  Toggle the {module} module switch off
+#   W1  Navigate back to the Activity tab
+# THEN
+#   T0  The {module} module is not shown on the Activity tab
+#   T1  Reopening customization shows the {module} switch still off
+#
+# Start screen: the Activity tab customization screen (ActivityTabCustomizationActivity).
+#
+# PARAMETER -> ANDROID MODULE MAPPING
+#   The case names modules generically. On Android each is an `ActivityTabModules.ModuleType`
+#   whose switch is tagged `activity_tab_customize_switch_<key>` and whose content on the tab
+#   is tagged `activity_tab_module_<key>`:
+#
+#     {module}          ModuleType         MODULE_KEY         switch label            content on the Activity tab
+#     ---------------   ----------------   ----------------   ---------------------   ---------------------------------
+#     Impact            IMPACT             impact             "All time impact"       All time impact card
+#     Reading history   READING_INSIGHTS   reading_insights   "Reading insights"      "Articles read this month" card
+#     Timeline          TIMELINE           timeline           "Timeline of behavior"  timeline rows / empty state
+#
+#   Android splits the reading-history area into two switches ("Time spent reading" and
+#   "Reading insights"); the generic "Reading history" parameter maps to READING_INSIGHTS,
+#   the one that gates the reading-history cards themselves.
+#
+# REQUIRED ENV
+#   This flow deliberately declares no `env:` block: a flow's own `env` can shadow the values a
+#   caller passes, which would silently pin every parameter set to the same module. Every
+#   variable below must be supplied by the caller - which is what the tc-4-...-set<N>.yaml
+#   wrappers do. A wrong or missing MODULE_KEY fails loudly, because the switch id below then
+#   matches nothing.
+#
+#     MODULE               display name of the module under test, used in labels ("Impact")
+#     MODULE_KEY           ModuleType key used to build the test tags ("impact")
+#     MODULE_SWITCH_TITLE  the switch's on-screen label, used in labels ("All time impact")
+#     SET_INDEX            parameter set index, used in the screenshot file names ("0")
+#     USERNAME / PASSWORD  credentials the mock backend accepts
+#     SHOTS                screenshot output directory, relative to the repo root
+#     API_BASE_URL         the mock backend as seen from the device ("http://10.0.2.2:8080")
+#
+# HOW TO RUN
+#   1. Start the mock backend on the host:
+#        MOCK_USERNAME=maestro-user MOCK_PASSWORD=correct-horse-battery \
+#          python3 .maestro/mock/activity_tab_server.py
+#   2. Install a *debug* build (the launch-arg seam is gated on BuildConfig.DEBUG):
+#        ./gradlew assembleDevDebug
+#        adb install -r app/build/outputs/apk/dev/debug/app-dev-debug.apk
+#   3. maestro test .maestro/tc-4-activity-tab-module-visibility-set0.yaml
+#   Or simply: .maestro/run-tc-4.sh   (does all of the above, once per parameter set)
+#
+# Screenshots land in .maestro/screenshots/ as tc-4-set<S>-start.png,
+# tc-4-set<S>-when<W>-before.png and tc-4-set<S>-when<W>-after.png.
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Point the app at the mock backend.
+#
+# AppConfig.applyLaunchOverrides() (debug-only) reads these launcher-intent extras and repoints
+# the home wiki's Action API / REST v1 / Core REST at the mock, which is what lets the flow sign
+# a user in (G0) and gives the impact module deterministic content to render.
+# -----------------------------------------------------------------------------
+- launchApp:
+    clearState: true
+    permissions:
+      # Pre-grant notifications: the app asks for POST_NOTIFICATIONS during onboarding and again
+      # right after a successful login, and that system dialog would otherwise cover the screen
+      # the flow is working on.
+      all: deny
+      notifications: allow
+    arguments:
+      apiBaseUrl: "${API_BASE_URL}"
+      disableCertPinning: true
+    label: "Launch a freshly-cleared app pointed at the mock backend"
+- waitForAnimationToEnd:
+    timeout: 10000
+
+# A cleared app shows the intro pager (two variants: "Forward" arrows on first launch after
+# install, "Skip"/"Next" on the topic-personalisation pager). Android 13+ also raises the
+# notifications permission dialog part-way through. Dismiss all of them, best-effort.
+- repeat:
+    times: 12
+    label: "Dismiss first-run onboarding and any permission dialogs"
+    commands:
+      - tapOn:
+          text: "Don.t allow|Allow|While using the app|No thanks"
+          optional: true
+      - tapOn:
+          text: "Skip|Forward|Next|Get started"
+          optional: true
+      - waitForAnimationToEnd:
+          timeout: 2000
+- extendedWaitUntil:
+    visible:
+      id: "org.wikipedia.dev:id/nav_tab_edits"
+    timeout: 30000
+    label: "Onboarding dismissed, main screen reached"
+
+# The very first visit to the Activity tab pushes ActivityTabOnboardingActivity in front of it.
+- tapOn:
+    id: "org.wikipedia.dev:id/nav_tab_edits"
+- waitForAnimationToEnd:
+    timeout: 6000
+- runFlow:
+    when:
+      visible: "Introducing Activity"
+    label: "Dismiss the one-time Activity tab onboarding"
+    commands:
+      - tapOn: "Continue"
+      - waitForAnimationToEnd:
+          timeout: 8000
+
+# -----------------------------------------------------------------------------
+# GIVEN G0 - the user is signed in.
+#
+# `clearState` wipes app data but NOT the AccountManager account, so a device that ran this flow
+# before is still signed in. Log in only when the logged-out call to action is actually showing;
+# either way G0 is verified below.
+#
+# The logged-out Activity tab's "Log in" opens LoginActivity directly (no CreateAccountActivity
+# in front of it). The mock answers action=clientlogin with status PASS.
+# -----------------------------------------------------------------------------
+- runFlow:
+    when:
+      visible:
+        id: "activity_tab_logged_out"
+    label: "GIVEN G0: sign in through the Activity tab's logged-out call to action"
+    commands:
+      - tapOn: "Log in"
+      - extendedWaitUntil:
+          visible:
+            id: "org.wikipedia.dev:id/login_button"
+          timeout: 20000
+      - tapOn:
+          id: "org.wikipedia.dev:id/login_username_text"
+      - inputText: "${USERNAME}"
+      - hideKeyboard
+      - tapOn:
+          id: "org.wikipedia.dev:id/login_password_input"
+      - inputText: "${PASSWORD}"
+      - hideKeyboard
+      - tapOn:
+          id: "org.wikipedia.dev:id/login_button"
+      - waitForAnimationToEnd:
+          timeout: 8000
+      # On a device where notifications were never granted the app re-asks right after login.
+      - tapOn:
+          text: "Don.t allow|Allow|While using the app|No thanks"
+          optional: true
+      - extendedWaitUntil:
+          visible:
+            id: "org.wikipedia.dev:id/nav_tab_edits"
+          timeout: 30000
+
+# Returning from the Activity tab onboarding leaves MainActivity's toolbar hidden (it is only
+# re-shown by onTabChanged), so bounce through Home once to bring the toolbar - and with it the
+# overflow menu that opens the customization screen - on screen.
+- tapOn:
+    id: "org.wikipedia.dev:id/nav_tab_home"
+- waitForAnimationToEnd:
+    timeout: 4000
+- tapOn:
+    id: "org.wikipedia.dev:id/nav_tab_edits"
+- extendedWaitUntil:
+    visible:
+      id: "org.wikipedia.dev:id/empty"
+    timeout: 20000
+    label: "Activity tab with its overflow menu is on screen"
+
+# G0 verified: the Activity tab renders the signed-in dashboard rather than the logged-out call
+# to action, and it is headed by the signed-in user's name.
+- assertNotVisible:
+    id: "activity_tab_logged_out"
+    label: "GIVEN G0 verified: the logged-out Activity tab state is gone"
+- extendedWaitUntil:
+    visible: "${USERNAME}.s reading"
+    timeout: 20000
+    label: "GIVEN G0 verified: signed in as ${USERNAME}"
+
+# The module under test must be on the tab to begin with, otherwise T0 would pass vacuously.
+# scrollUntilVisible fails the flow if the module never shows up.
+- scrollUntilVisible:
+    element:
+      id: "activity_tab_module_${MODULE_KEY}"
+    direction: DOWN
+    timeout: 30000
+    centerElement: true
+    label: "Baseline: the ${MODULE} module IS shown on the Activity tab"
+- assertVisible:
+    id: "activity_tab_module_${MODULE_KEY}"
+- scrollUntilVisible:
+    element: "${USERNAME}.s reading"
+    direction: UP
+    timeout: 20000
+    label: "Back to the top of the Activity tab"
+
+# -----------------------------------------------------------------------------
+# Navigate to the start screen: the Activity tab customization screen.
+# The overflow submenu rows carry no per-item id, so the first row (Customize) is addressed by
+# the menu row title id plus its index.
+# -----------------------------------------------------------------------------
+- tapOn:
+    id: "org.wikipedia.dev:id/empty"
+    label: "Open the Activity tab overflow menu"
+- waitForAnimationToEnd:
+    timeout: 3000
+- tapOn:
+    id: "org.wikipedia.dev:id/title"
+    index: 0
+    label: "Open Customize (first overflow menu entry)"
+- extendedWaitUntil:
+    visible:
+      id: "activity_tab_customize_switch_${MODULE_KEY}"
+    timeout: 20000
+    label: "Start screen reached: Activity tab customization screen"
+- waitForAnimationToEnd:
+    timeout: 2000
+
+# -----------------------------------------------------------------------------
+# GIVEN G1 - all Activity tab modules are enabled.
+#
+# A cleared app starts from ActivityTabModules()'s defaults, which switch every configurable
+# module on. "Last in app donation" is deliberately not asserted: the customization screen only
+# renders that row once the user has a recorded donation, so it is absent here.
+# -----------------------------------------------------------------------------
+- assertVisible:
+    id: "activity_tab_customize_switch_time_spent"
+    checked: true
+    label: "GIVEN G1: Time spent reading is on"
+- assertVisible:
+    id: "activity_tab_customize_switch_reading_insights"
+    checked: true
+    label: "GIVEN G1: Reading insights is on"
+- assertVisible:
+    id: "activity_tab_customize_switch_editing_insights"
+    checked: true
+    label: "GIVEN G1: Editing insights is on"
+- assertVisible:
+    id: "activity_tab_customize_switch_impact"
+    checked: true
+    label: "GIVEN G1: All time impact is on"
+- assertVisible:
+    id: "activity_tab_customize_switch_games"
+    checked: true
+    label: "GIVEN G1: Game stats is on"
+- assertVisible:
+    id: "activity_tab_customize_switch_timeline"
+    checked: true
+    label: "GIVEN G1: Timeline of behavior is on"
+
+# START STATE - every Given holds and the start screen is visible.
+- takeScreenshot:
+    path: "${SHOTS}/tc-4-set${SET_INDEX}-start"
+
+# =============================================================================
+# WHEN W0 - Toggle the {module} module switch off
+# =============================================================================
+- takeScreenshot:
+    path: "${SHOTS}/tc-4-set${SET_INDEX}-when0-before"
+- tapOn:
+    id: "activity_tab_customize_switch_${MODULE_KEY}"
+    label: "WHEN W0: toggle the ${MODULE} (\"${MODULE_SWITCH_TITLE}\") switch off"
+- waitForAnimationToEnd:
+    timeout: 3000
+- assertVisible:
+    id: "activity_tab_customize_switch_${MODULE_KEY}"
+    checked: false
+    label: "WHEN W0: the ${MODULE} switch is now off"
+- takeScreenshot:
+    path: "${SHOTS}/tc-4-set${SET_INDEX}-when0-after"
+
+# =============================================================================
+# WHEN W1 - Navigate back to the Activity tab
+# =============================================================================
+- takeScreenshot:
+    path: "${SHOTS}/tc-4-set${SET_INDEX}-when1-before"
+- back
+- extendedWaitUntil:
+    visible:
+      id: "org.wikipedia.dev:id/nav_tab_edits"
+    timeout: 20000
+    label: "WHEN W1: back on the Activity tab"
+- extendedWaitUntil:
+    visible: "${USERNAME}.s reading"
+    timeout: 20000
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot:
+    path: "${SHOTS}/tc-4-set${SET_INDEX}-when1-after"
+
+# =============================================================================
+# THEN T0 - The {module} module is not shown on the Activity tab.
+#
+# Walk the whole tab from top to bottom, asserting after every scroll step that the module's
+# content is nowhere on screen. A single assertion would pass vacuously for a module that lives
+# below the fold, which is why this sweeps the entire scroll range - the same range the baseline
+# scrollUntilVisible above proved the module was reachable in.
+# =============================================================================
+- repeat:
+    times: 8
+    label: "THEN T0: sweep the Activity tab - the ${MODULE} module must not appear"
+    commands:
+      - assertNotVisible:
+          id: "activity_tab_module_${MODULE_KEY}"
+      - scroll
+      - waitForAnimationToEnd:
+          timeout: 1500
+- assertNotVisible:
+    id: "activity_tab_module_${MODULE_KEY}"
+    label: "THEN T0: the ${MODULE} module is not shown at the bottom of the tab either"
+
+# =============================================================================
+# THEN T1 - Reopening customization shows the {module} switch still off.
+#
+# The switch state lives in Prefs.activityTabModules (SharedPreferences); reopening the screen
+# rebuilds its state from that preference, so this is a real persistence check.
+# =============================================================================
+- tapOn:
+    id: "org.wikipedia.dev:id/empty"
+    label: "THEN T1: reopen the overflow menu"
+- waitForAnimationToEnd:
+    timeout: 3000
+- tapOn:
+    id: "org.wikipedia.dev:id/title"
+    index: 0
+    label: "THEN T1: reopen Customize"
+- extendedWaitUntil:
+    visible:
+      id: "activity_tab_customize_switch_${MODULE_KEY}"
+    timeout: 20000
+- waitForAnimationToEnd:
+    timeout: 2000
+- assertVisible:
+    id: "activity_tab_customize_switch_${MODULE_KEY}"
+    checked: false
+    label: "THEN T1: the ${MODULE} switch is still off after reopening customization"
+
+# Only the module under test was toggled - the others must be untouched.
+- assertVisible:
+    id: "activity_tab_customize_switch_time_spent"
+    checked: true
+    label: "THEN T1: unrelated switches are unchanged (Time spent reading)"
+- assertVisible:
+    id: "activity_tab_customize_switch_editing_insights"
+    checked: true
+    label: "THEN T1: unrelated switches are unchanged (Editing insights)"
+- assertVisible:
+    id: "activity_tab_customize_switch_games"
+    checked: true
+    label: "THEN T1: unrelated switches are unchanged (Game stats)"
+- takeScreenshot:
+    path: "${SHOTS}/tc-4-set${SET_INDEX}-reopened-customization"

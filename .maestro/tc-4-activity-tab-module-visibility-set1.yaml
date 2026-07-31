@@ -1,0 +1,20 @@
+appId: org.wikipedia.dev
+name: "TC4 set 1 - Reading history module visibility persists"
+tags:
+  - android
+  - activity-tab
+  - customization
+---
+# Parameter set 1: {module} = "Reading history" -> ModuleType.READING_INSIGHTS ("Reading
+# insights"), the switch that gates the reading-history cards on the Activity tab.
+- runFlow:
+    file: tc-4-activity-tab-module-visibility.yaml
+    env:
+      MODULE: "Reading history"
+      MODULE_KEY: "reading_insights"
+      MODULE_SWITCH_TITLE: "Reading insights"
+      SET_INDEX: "1"
+      USERNAME: "maestro-user"
+      PASSWORD: "correct-horse-battery"
+      SHOTS: ".maestro/screenshots"
+      API_BASE_URL: "http://10.0.2.2:8080"
