@@ -1,0 +1,163 @@
+appId: org.wikipedia.dev
+name: "TC1 - Privacy Policy opens from the Login screen"
+# Test case 1: Privacy Policy opens from the Login screen
+#
+#   Given G0: the user is signed out of any account
+#   When  W0: from the Login screen, tap the Privacy Policy link
+#   Then  T0: the Wikipedia privacy policy opens in a browser view
+#   Then  T1: navigating back returns to the Login screen
+#
+# No network mocking is required: reaching the Login screen is pure UI
+# navigation and the Privacy Policy link opens a hard-coded external URL
+# (https://foundation.wikimedia.org/.../Privacy_policy) in the device browser.
+#
+# Prerequisite: the device must have a working default browser whose first-run
+# experience is already completed. The flow includes a best-effort guard that
+# dismisses Chrome's sign-in first-run screen if it happens to surface.
+---
+# ============================================================
+# Initialization: satisfy the Givens and land on the Login screen
+# ============================================================
+
+# G0: clearState wipes any signed-in account -> the user starts signed out.
+- launchApp:
+    clearState: true
+    permissions:
+      all: allow
+
+# First-run onboarding pager (INTRO -> DATA & PRIVACY -> LANGUAGES).
+# The forward arrow (content description "Forward") advances each page; the
+# third tap finishes onboarding.
+- extendedWaitUntil:
+    visible:
+      text: "Forward"
+    timeout: 30000
+- repeat:
+    times: 3
+    commands:
+      - tapOn:
+          text: "Forward"
+          label: "Advance first-run onboarding"
+      - waitForAnimationToEnd
+
+# Second onboarding ("Follow your curiosity") -> skip topic selection.
+- tapOn:
+    text: "Skip"
+    label: "Skip topic onboarding"
+- waitForAnimationToEnd
+
+# Explore feed -> open the "More" menu.
+- assertVisible:
+    id: "nav_tab_more"
+    label: "Explore feed is shown"
+- tapOn:
+    id: "nav_tab_more"
+    label: "Open More menu"
+- waitForAnimationToEnd
+
+# G0 verification: the account row offers "Log in / join Wikipedia",
+# which is only shown when no user is signed in.
+- assertVisible:
+    id: "main_drawer_login_button"
+    label: "Signed out (Log in is offered)"
+- tapOn:
+    id: "main_drawer_account_container"
+    label: "Tap Log in"
+- waitForAnimationToEnd
+
+# The account-creation screen is shown first; follow its "Log in" link to reach
+# the Login screen itself.
+- assertVisible:
+    id: "create_account_login_button"
+    label: "Create-account screen shown"
+- tapOn:
+    id: "create_account_login_button"
+    label: "Go to the Login screen"
+- waitForAnimationToEnd
+
+# ============================================================
+# Start state: on the Login screen with every Given satisfied
+# ============================================================
+- assertVisible:
+    id: "login_create_account_button"
+    label: "Login screen is shown"
+- assertVisible:
+    id: "privacy_policy_link"
+    label: "Privacy Policy link is present"
+- takeScreenshot: "tc-1-set0-start"
+
+# ============================================================
+# W0: from the Login screen, tap the Privacy Policy link
+# ============================================================
+- takeScreenshot: "tc-1-set0-when0-before"
+- tapOn:
+    id: "privacy_policy_link"
+    label: "W0: Tap the Privacy Policy link"
+
+# Wait for the browser to come up (or, on a browser that has never been opened,
+# its first-run screen).
+- extendedWaitUntil:
+    visible:
+      text: ".*(foundation.wikimedia.org|Use without an account).*"
+    timeout: 20000
+
+# Best-effort: dismiss Chrome's sign-in first-run screen if it appears.
+# No-op when the browser is already set up.
+- runFlow:
+    when:
+      visible:
+        id: "com.android.chrome:id/signin_fre_dismiss_button"
+    commands:
+      - tapOn:
+          id: "com.android.chrome:id/signin_fre_dismiss_button"
+          label: "Use browser without an account"
+      - runFlow:
+          when:
+            visible: "No thanks"
+          commands:
+            - tapOn:
+                text: "No thanks"
+                label: "Decline browser notifications"
+      - waitForAnimationToEnd
+
+# ============================================================
+# T0: the Wikipedia privacy policy opens in a browser view
+# The privacy-policy URL is only ever rendered in the browser's address bar,
+# never inside the Wikipedia app, so this genuinely proves the browser opened.
+# ============================================================
+- extendedWaitUntil:
+    visible:
+      text: ".*foundation.wikimedia.org.*"
+    timeout: 20000
+    label: "T0: Privacy policy URL shown in the browser"
+- takeScreenshot: "tc-1-set0-when0-after"
+
+# ============================================================
+# T1: navigating back returns to the Login screen
+# ============================================================
+# Let the page finish loading/redirecting (the privacy URL is a
+# Special:MyLanguage redirect) so that Back exits the browser cleanly instead
+# of navigating within a transient in-page history entry.
+- waitForAnimationToEnd
+- pressKey: "back"
+- waitForAnimationToEnd
+# Safety net: if a residual in-page history entry kept the browser open,
+# navigate back once more. Skipped when Back already returned to the app.
+- runFlow:
+    when:
+      visible:
+        text: ".*foundation.wikimedia.org.*"
+    commands:
+      - pressKey: "back"
+      - waitForAnimationToEnd
+- extendedWaitUntil:
+    visible:
+      id: "login_create_account_button"
+    timeout: 15000
+    label: "T1: Back returns to the Login screen"
+- assertVisible:
+    id: "privacy_policy_link"
+    label: "Login screen Privacy Policy link visible again"
+- assertNotVisible:
+    text: ".*foundation.wikimedia.org.*"
+    label: "Browser view is no longer shown"
