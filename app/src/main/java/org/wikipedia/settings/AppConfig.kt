@@ -1,9 +1,19 @@
 package org.wikipedia.settings
 
 import android.content.Intent
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.wikipedia.BuildConfig
 import org.wikipedia.WikipediaApp
+import org.wikipedia.database.AppDatabase
 import org.wikipedia.dataclient.WikiSite
+import org.wikipedia.donate.DonationResult
+import org.wikipedia.history.HistoryEntry
+import org.wikipedia.page.PageTitle
+import java.time.LocalDateTime
+import java.util.Date
+import java.util.concurrent.TimeUnit
 
 /**
  * Holds launch-time configuration overrides that let a Maestro UI test point the app at a mock
@@ -25,11 +35,23 @@ import org.wikipedia.dataclient.WikiSite
  *    cleartext traffic via `src/debug/res/xml/network_security_config.xml`, which is what lets the
  *    plain-HTTP mock traffic through. The parsed value is exposed as [certPinningEnabled] for
  *    parity with iOS and any future use.
+ *
+ *  - `mockActivityData` (Boolean, or the strings `"true"`/`"1"`): seeds the *locally stored*
+ *    activity data that the Activity tab reads but that no API can supply — a donation in
+ *    [Prefs.donationResults] and a couple of recently read articles (with time spent) in the
+ *    history database. See [seedActivityData].
  */
 object AppConfig {
 
     const val ARG_API_BASE_URL = "apiBaseUrl"
     const val ARG_DISABLE_CERT_PINNING = "disableCertPinning"
+    const val ARG_MOCK_ACTIVITY_DATA = "mockActivityData"
+
+    private const val MOCK_DONATION_DAYS_AGO = 3L
+    private const val MOCK_DONATION_AMOUNT = 5f
+    private const val MOCK_DONATION_CURRENCY = "USD"
+    private const val MOCK_TIME_SPENT_SEC = 900
+    private val MOCK_READ_ARTICLES = listOf("Maestro (software)", "Android (operating system)")
 
     var apiBaseUrl: String = ""
         private set
@@ -58,6 +80,47 @@ object AppConfig {
             // own link-routing checks (supportedAuthority).
             WikiSite.setDefaultBaseUrl(apiBaseUrl)
             WikipediaApp.instance.resetWikiSite()
+        }
+
+        if (parseBoolean(extras.get(ARG_MOCK_ACTIVITY_DATA))) {
+            seedActivityData()
+        }
+    }
+
+    /**
+     * Populates the parts of the Activity tab's data that live on the device rather than behind an
+     * API, so a UI test can start from a known, non-empty activity state:
+     *
+     *  - one [DonationResult] a few days old, which is what makes the Donation History module both
+     *    configurable and visible ([org.wikipedia.activitytab.ModuleType.DONATIONS]), and
+     *  - a couple of recently read articles with time spent on them, which is what the reading
+     *    history module and the reading half of the timeline are built from.
+     *
+     * Edit activity is not seeded here: it comes from the API, i.e. from the mock server that
+     * [ARG_API_BASE_URL] points the app at.
+     */
+    private fun seedActivityData() {
+        Prefs.donationResults = listOf(
+            DonationResult(
+                dateTime = LocalDateTime.now().minusDays(MOCK_DONATION_DAYS_AGO).toString(),
+                fromWeb = false,
+                amount = MOCK_DONATION_AMOUNT,
+                currency = MOCK_DONATION_CURRENCY,
+                recurring = false
+            )
+        )
+
+        CoroutineScope(Dispatchers.IO).launch {
+            val wikiSite = WikipediaApp.instance.wikiSite
+            MOCK_READ_ARTICLES.forEachIndexed { index, title ->
+                val entry = HistoryEntry(
+                    title = PageTitle(title, wikiSite),
+                    source = HistoryEntry.SOURCE_SEARCH,
+                    timestamp = Date(System.currentTimeMillis() - TimeUnit.HOURS.toMillis(index + 1L))
+                )
+                AppDatabase.instance.historyEntryDao().insert(listOf(entry))
+                AppDatabase.instance.pageImagesDao().upsertForTimeSpent(entry, MOCK_TIME_SPENT_SEC)
+            }
         }
     }
 

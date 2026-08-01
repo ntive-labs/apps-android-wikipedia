@@ -22,6 +22,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -30,6 +31,7 @@ import org.wikipedia.WikipediaApp
 import org.wikipedia.activity.BaseActivity
 import org.wikipedia.analytics.eventplatform.ActivityTabEvent
 import org.wikipedia.compose.components.WikiTopAppBar
+import org.wikipedia.compose.extensions.exposeTestTagsAsResourceIds
 import org.wikipedia.compose.theme.BaseTheme
 import org.wikipedia.compose.theme.WikipediaTheme
 import org.wikipedia.games.WikiGames
@@ -102,7 +104,8 @@ fun CustomizationScreen(
 
     Scaffold(
         modifier = modifier
-            .safeDrawingPadding(),
+            .safeDrawingPadding()
+            .exposeTestTagsAsResourceIds(),
         topBar = {
             WikiTopAppBar(
                 title = stringResource(R.string.activity_tab_menu_customize),
@@ -134,6 +137,7 @@ fun CustomizationScreen(
                     CustomizationScreenSwitch(
                         isChecked = currentModules.isModuleEnabled(moduleType),
                         title = stringResource(moduleType.displayName),
+                        switchTestTag = moduleType.switchTestTag,
                         onCheckedChange = { isChecked ->
                             currentModules = currentModules.setModuleEnabled(moduleType, isChecked)
                             Prefs.activityTabModules = currentModules
@@ -155,7 +159,8 @@ private fun CustomizationScreenSwitch(
     isChecked: Boolean,
     title: String,
     onCheckedChange: ((Boolean) -> Unit),
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    switchTestTag: String? = null
 ) {
     ListItem(
         modifier = modifier,
@@ -171,6 +176,7 @@ private fun CustomizationScreenSwitch(
         },
         trailingContent = {
             Switch(
+                modifier = switchTestTag?.let { Modifier.testTag(it) } ?: Modifier,
                 checked = isChecked,
                 onCheckedChange = {
                     onCheckedChange(it)

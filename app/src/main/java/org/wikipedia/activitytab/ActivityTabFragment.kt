@@ -56,6 +56,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -95,6 +96,7 @@ import org.wikipedia.categories.db.Category
 import org.wikipedia.compose.components.HtmlText
 import org.wikipedia.compose.components.WikiLangCodeBox
 import org.wikipedia.compose.components.error.WikiErrorClickEvents
+import org.wikipedia.compose.extensions.exposeTestTagsAsResourceIds
 import org.wikipedia.compose.extensions.shimmerEffect
 import org.wikipedia.compose.theme.BaseTheme
 import org.wikipedia.compose.theme.WikipediaTheme
@@ -282,7 +284,8 @@ class ActivityTabFragment : Fragment() {
         Scaffold(
             modifier = Modifier
                 .fillMaxSize()
-                .background(WikipediaTheme.colors.paperColor),
+                .background(WikipediaTheme.colors.paperColor)
+                .exposeTestTagsAsResourceIds(),
             containerColor = WikipediaTheme.colors.paperColor
         ) { paddingValues ->
             var isRefreshing by remember { mutableStateOf(false) }
@@ -296,6 +299,7 @@ class ActivityTabFragment : Fragment() {
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(paddingValues)
+                        .testTag(LOGGED_OUT_TEST_TAG)
                 ) {
                     val scrollState = rememberScrollState()
 
@@ -520,7 +524,8 @@ class ActivityTabFragment : Fragment() {
                                 EditingInsightsModule(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(start = 16.dp, end = 16.dp, top = 16.dp),
+                                        .padding(start = 16.dp, end = 16.dp, top = 16.dp)
+                                        .testTag(ModuleType.EDITING_INSIGHTS.moduleTestTag),
                                     uiState = impactUiState,
                                     onPageItemClick = {
                                         val entry = HistoryEntry(
@@ -560,7 +565,8 @@ class ActivityTabFragment : Fragment() {
                                 ImpactModule(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(start = 16.dp, end = 16.dp, top = 16.dp),
+                                        .padding(start = 16.dp, end = 16.dp, top = 16.dp)
+                                        .testTag(ModuleType.IMPACT.moduleTestTag),
                                     uiState = impactUiState,
                                     onTotalEditsClick = {
                                         startActivity(UserContribListActivity.newIntent(requireContext(), userName))
@@ -617,7 +623,8 @@ class ActivityTabFragment : Fragment() {
                                 DonationModule(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(start = 16.dp, end = 16.dp, top = 16.dp),
+                                        .padding(start = 16.dp, end = 16.dp, top = 16.dp)
+                                        .testTag(ModuleType.DONATIONS.moduleTestTag),
                                     uiState = donationUiState,
                                     onClick = {
                                         ActivityTabEvent.submit(activeInterface = "activity_tab", action = "last_donation_click",
@@ -667,6 +674,7 @@ class ActivityTabFragment : Fragment() {
                                             .align(Alignment.Center)
                                             .padding(horizontal = 16.dp)
                                             .padding(top = 32.dp, bottom = 52.dp)
+                                            .testTag(ModuleType.TIMELINE.moduleTestTag)
                                     )
                                 }
                                 return@LazyColumn
@@ -687,6 +695,7 @@ class ActivityTabFragment : Fragment() {
                                 }
                                 is TimelineDisplayItem.TimelineEntry -> {
                                     TimelineModule(
+                                        modifier = Modifier.testTag(ModuleType.TIMELINE.moduleTestTag),
                                         timelineItem = displayItem.item,
                                         onItemClick = {
                                             handleTimelineItemClick(it)
@@ -862,6 +871,12 @@ class ActivityTabFragment : Fragment() {
     }
 
     companion object {
+        /**
+         * Stable id for the logged-out call to action, so UI automation can tell the signed-in
+         * dashboard apart from the "log in to see your activity" state without matching text.
+         */
+        const val LOGGED_OUT_TEST_TAG = "activity_tab_logged_out"
+
         fun newInstance(): ActivityTabFragment {
             return ActivityTabFragment().apply {
                 arguments = Bundle().apply {

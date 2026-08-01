@@ -44,3 +44,5 @@ device*.png
 
 # Log Files
 *.log
+# Maestro flow output (screenshots are published with the PR, not committed)
+.maestro/screenshots/

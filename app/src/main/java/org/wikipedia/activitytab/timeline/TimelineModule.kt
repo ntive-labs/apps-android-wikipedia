@@ -48,10 +48,11 @@ import java.util.Date
 @Composable
 fun TimelineModule(
     timelineItem: TimelineItem,
-    onItemClick: (TimelineItem) -> Unit
+    onItemClick: (TimelineItem) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .clickable(onClick = { onItemClick(timelineItem) })
             .padding(horizontal = 16.dp, vertical = 8.dp)
     ) {

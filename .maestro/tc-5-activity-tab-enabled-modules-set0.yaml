@@ -1,0 +1,17 @@
+appId: org.wikipedia.dev
+name: "TC5 set 0 - Enabled Activity tab modules are shown"
+tags:
+  - android
+  - activity-tab
+  - modules
+---
+# The case is not parameterized, so there is a single set (index 0). The wrapper exists so the
+# shared flow never carries its own `env` block, which would shadow caller-supplied values.
+- runFlow:
+    file: tc-5-activity-tab-enabled-modules.yaml
+    env:
+      SET_INDEX: "0"
+      USERNAME: "maestro-user"
+      PASSWORD: "correct-horse-battery"
+      SHOTS: ".maestro/screenshots"
+      API_BASE_URL: "http://10.0.2.2:8080"

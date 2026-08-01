@@ -55,5 +55,13 @@ enum class ModuleType(val displayName: Int) {
     IMPACT(R.string.activity_tab_customize_screen_impact_switch_title),
     GAMES(R.string.activity_tab_customize_screen_games_switch_title),
     DONATIONS(R.string.activity_tab_customize_screen_donations_switch_title),
-    TIMELINE(R.string.activity_tab_customize_screen_timeline_switch_title)
+    TIMELINE(R.string.activity_tab_customize_screen_timeline_switch_title);
+
+    /**
+     * Stable, localization-proof ids for UI automation. They surface as Android resource ids
+     * because the Activity tab and its customization screen opt in with
+     * [org.wikipedia.compose.extensions.exposeTestTagsAsResourceIds].
+     */
+    val switchTestTag get() = "activity_tab_customize_switch_${name.lowercase()}"
+    val moduleTestTag get() = "activity_tab_module_${name.lowercase()}"
 }
