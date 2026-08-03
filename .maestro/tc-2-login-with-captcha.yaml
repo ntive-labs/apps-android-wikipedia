@@ -1,0 +1,184 @@
+appId: org.wikipedia.dev
+name: "TC2 - Login completes after answering a CAPTCHA challenge"
+# Test case 2: Login completes after answering a CAPTCHA challenge
+# User story: "Answer CAPTCHA Challenge during Login"
+#
+#   Given G0: the user is signed out
+#   Given G1: the login API is mocked to require an image CAPTCHA challenge before
+#             completing sign-in
+#   When  W0: enter the username {username} and password {password}
+#   When  W1: submit the login form
+#   When  W2: type the CAPTCHA answer into the challenge field
+#   When  W3: submit the login form again
+#   Then  T0: the CAPTCHA image and answer field are shown after the first submit
+#   Then  T1: login completes and the app shows the signed-in state
+#
+# G1 is satisfied by .maestro/mock/captcha_login_server.py, which must already be running
+# on the host (see .maestro/README.md or .maestro/run-tc-2.sh). It answers the first
+# clientlogin POST with FAIL and then advertises a FancyCaptcha `captchaId` through
+# action=query&meta=authmanagerinfo&amirequestsfor=login, which is exactly what makes
+# LoginClient call LoginActivity.uiPrompt(captchaId = ...) and show the image-captcha
+# widget. The second clientlogin POST - the one that carries captchaId + captchaWord -
+# returns PASS only when the posted word matches ${CAPTCHA_ANSWER}, which is the word the
+# mock draws into the CAPTCHA PNG it serves at /w/index.php?title=Special:Captcha/image.
+#
+# env (all required; supplied by the per-parameter-set wrapper flows, e.g.
+# tc-2-login-with-captcha-set0.yaml):
+#   SET_INDEX          parameter-set index, used in the screenshot names
+#   USERNAME           {username}
+#   PASSWORD           {password}
+#   CAPTCHA_ANSWER     the word the mock draws into the CAPTCHA image
+#   MOCK_API_BASE_URL  base URL of the mock server as seen from the device
+#
+# NOTE: no `env:` defaults block on purpose. Maestro applies a flow's header env *after*
+# the env handed to it by `runFlow`, so defaults here would overwrite the parameter set.
+---
+# ============================================================
+# Initialization - satisfy the Givens and land on the start screen
+#   G0: clearState (inside the shared flow) wipes any stored account.
+#   G1: the shared flow launches the app with the `apiBaseUrl` debug seam pointing the
+#       home wiki at the CAPTCHA mock server.
+# ============================================================
+- runFlow:
+    file: shared/login-screen-signed-out.yaml
+    env:
+      MOCK_API_BASE_URL: "${MOCK_API_BASE_URL}"
+
+# ---- Start state: the Login screen, signed out, mock backend armed --------------------
+- assertVisible:
+    id: "login_button"
+    label: "Start screen: Login screen"
+- assertVisible:
+    id: "login_create_account_button"
+- assertNotVisible:
+    id: "captcha_image"
+    label: "No CAPTCHA challenge yet"
+- assertNotVisible:
+    id: "captcha_text"
+- takeScreenshot: "tc-2-set${SET_INDEX}-start"
+
+# ============================================================
+# W0: Enter the username ${USERNAME} and password ${PASSWORD}
+# ============================================================
+- takeScreenshot: "tc-2-set${SET_INDEX}-when0-before"
+- tapOn:
+    id: "login_username_text"
+    label: "Focus the username field"
+- inputText: "${USERNAME}"
+- tapOn:
+    id: "login_password_input"
+    label: "Focus the password field"
+- inputText: "${PASSWORD}"
+- hideKeyboard
+- waitForAnimationToEnd
+- assertVisible:
+    id: "login_username_text"
+    containsDescendants:
+      - text: "${USERNAME}"
+    label: "W0: username entered"
+- assertVisible:
+    id: "login_button"
+    enabled: true
+    label: "W0: password entered (the Log in button only enables once both fields are filled)"
+- takeScreenshot: "tc-2-set${SET_INDEX}-when0-after"
+
+# ============================================================
+# W1: Submit the login form
+# ============================================================
+- takeScreenshot: "tc-2-set${SET_INDEX}-when1-before"
+- tapOn:
+    id: "login_button"
+    label: "W1: Submit the login form"
+# The app posts credentials, gets FAIL, asks authmanagerinfo, learns a captchaId is
+# required and reveals the image-captcha widget (group_captcha.xml, hidden until now).
+- extendedWaitUntil:
+    visible:
+      id: "captcha_image"
+    timeout: 30000
+    label: "CAPTCHA challenge appears"
+- waitForAnimationToEnd
+- takeScreenshot: "tc-2-set${SET_INDEX}-when1-after"
+
+# ---- T0: the CAPTCHA image and answer field are shown after the first submit ----------
+- assertVisible:
+    id: "captcha_image"
+    label: "T0: CAPTCHA image is shown"
+- assertVisible:
+    id: "captcha_text"
+    label: "T0: CAPTCHA answer field is shown"
+- assertVisible:
+    text: "To help protect against automated spam, please enter the words that appear below"
+    label: "T0: CAPTCHA prompt text is shown"
+- assertVisible:
+    id: "login_button"
+    label: "T0: still on the Login screen, not signed in"
+
+# ============================================================
+# W2: Type the CAPTCHA answer into the challenge field
+# ============================================================
+- takeScreenshot: "tc-2-set${SET_INDEX}-when2-before"
+- tapOn:
+    id: "captcha_text"
+    label: "W2: Focus the CAPTCHA answer field"
+- inputText: "${CAPTCHA_ANSWER}"
+- hideKeyboard
+- waitForAnimationToEnd
+- assertVisible:
+    id: "captcha_text"
+    containsDescendants:
+      - text: "${CAPTCHA_ANSWER}"
+    label: "W2: CAPTCHA answer entered"
+- takeScreenshot: "tc-2-set${SET_INDEX}-when2-after"
+
+# ============================================================
+# W3: Submit the login form again
+# ============================================================
+- takeScreenshot: "tc-2-set${SET_INDEX}-when3-before"
+- tapOn:
+    id: "login_button"
+    label: "W3: Submit the login form again"
+# LoginActivity only calls finish() from onLoginSuccess(), so the Login screen going away
+# is itself proof that the CAPTCHA continuation was accepted.
+- extendedWaitUntil:
+    notVisible:
+      id: "login_button"
+    timeout: 30000
+    label: "T1: the Login screen closes on successful login"
+- takeScreenshot: "tc-2-set${SET_INDEX}-when3-after"
+
+# ---- T1: login completes and the app shows the signed-in state -----------------------
+- assertNotVisible:
+    id: "captcha_image"
+    label: "T1: the CAPTCHA challenge is gone"
+# MainFragment shows a "Logged in!" snackbar on RESULT_LOGIN_SUCCESS. It is a
+# LENGTH_LONG snackbar, so it can already have faded by the time the hierarchy is polled -
+# recorded as a non-blocking check; the account state below is the binding assertion.
+- assertVisible:
+    text: "Logged in!"
+    optional: true
+    label: "T1: 'Logged in!' confirmation"
+# Let the snackbar fade so it cannot swallow the bottom-navigation tap below.
+- extendedWaitUntil:
+    notVisible: "Logged in!"
+    timeout: 15000
+# The More menu is the app's account surface: signed in it shows the account name and
+# hides the "Log in / join Wikipedia" action.
+- tapOn:
+    id: "nav_tab_more"
+    label: "Open the More menu"
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible:
+      id: "main_drawer_account_name"
+    timeout: 20000
+- assertVisible:
+    id: "main_drawer_account_name"
+    text: "${USERNAME}"
+    label: "T1: signed in as ${USERNAME}"
+- assertNotVisible:
+    id: "main_drawer_login_button"
+    label: "T1: the sign-in action is no longer offered"
+- assertVisible:
+    id: "main_drawer_watchlist_container"
+    label: "T1: signed-in-only menu entries are available"
+- takeScreenshot: "tc-2-set${SET_INDEX}-signed-in-state"
