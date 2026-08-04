@@ -1,0 +1,18 @@
+appId: org.wikipedia.dev
+name: "TC3 set 0 - A replacement CAPTCHA image can be requested during login"
+# Parameter set 0 of test case 3. The case itself is not parameterized - it names no
+# values - so there is a single set, kept as a wrapper for consistency with the other test
+# cases and to hold the mock endpoints.
+#
+# Requires .maestro/mock/captcha_login_server.py to be running on the host (see
+# .maestro/run-tc-3.sh). MOCK_API_BASE_URL is how the *emulator* reaches it, while
+# MOCK_STATS_URL is how *maestro itself* reaches it to read the request log.
+---
+- runFlow:
+    file: tc-3-request-new-captcha.yaml
+    env:
+      SET_INDEX: "0"
+      USERNAME: "maestro-user"
+      PASSWORD: "correct-horse-battery"
+      MOCK_API_BASE_URL: "http://10.0.2.2:8080"
+      MOCK_STATS_URL: "http://localhost:8080/mock/stats"

@@ -1,0 +1,173 @@
+appId: org.wikipedia.dev
+name: "TC3 - A replacement CAPTCHA image can be requested during login"
+# Test case 3: A replacement CAPTCHA image can be requested during login
+# User story: "Request replacement CAPTCHA Challenge during Login"
+#
+#   Given G0: the user is signed out
+#   Given G1: the login API is mocked to require an image CAPTCHA challenge
+#   When  W0: submit valid credentials to reach the CAPTCHA challenge
+#   When  W1: tap the control that requests a new CAPTCHA image
+#   Then  T0: a different CAPTCHA image replaces the original
+#   Then  T1: exactly one replacement image was requested from the mocked server
+#
+# The control in W1 is the CAPTCHA image itself: CaptchaHandler's init block wires
+# `captchaImage.setOnClickListener { requestNewCaptcha() }`, and group_captcha.xml spells
+# that out for the user underneath the image ("Tap CAPTCHA to reload"). There is no
+# separate refresh button.
+#
+# Verifying T0/T1 needs evidence from both sides of the wire:
+#
+#   * on screen  - the challenge is still displayed after the tap, its spinner has
+#                  finished, and the login screen has not moved on. The before/after
+#                  screenshots show the two different CAPTCHA words.
+#   * on the mock - an ImageView's pixels are opaque to Maestro, so the binding proof that
+#                  the image *changed* is what the app fetched: scripts/read-captcha-mock-stats.js
+#                  reads GET /mock/stats and the assertions below check that a second,
+#                  different challenge (different captchaId, different SHA-256 of the bytes
+#                  served) was pulled after the tap - and that it happened exactly once.
+#
+# G1 is satisfied by .maestro/mock/captcha_login_server.py, which must already be running
+# on the host (see .maestro/README.md or .maestro/run-tc-3.sh). It answers the first
+# clientlogin POST with FAIL and then advertises a FancyCaptcha `captchaId` through
+# action=query&meta=authmanagerinfo&amirequestsfor=login, which is what makes LoginClient
+# call LoginActivity.uiPrompt(captchaId = ...) and show the image-captcha widget. Each
+# action=fancycaptchareload then mints a *new* captcha id whose image spells a different
+# word, exactly like MediaWiki's FancyCaptcha.
+#
+# env (all required; supplied by the per-parameter-set wrapper flow
+# tc-3-request-new-captcha-set0.yaml):
+#   SET_INDEX          parameter-set index, used in the screenshot names
+#   USERNAME           the account name to log in with
+#   PASSWORD           the password to log in with
+#   MOCK_API_BASE_URL  base URL of the mock server as seen from the *device* (10.0.2.2)
+#   MOCK_STATS_URL     the mock's /mock/stats endpoint as seen from the *host* running
+#                      maestro (localhost) - the device alias is not reachable from here
+#
+# NOTE: no `env:` defaults block on purpose. Maestro applies a flow's header env *after*
+# the env handed to it by `runFlow`, so defaults here would overwrite the parameter set.
+---
+# ============================================================
+# Initialization - satisfy the Givens and land on the start screen
+#   G0: clearState (inside the shared flow) wipes any stored account, and the shared flow
+#       signs out any AccountManager session that survived it.
+#   G1: the shared flow launches the app with the `apiBaseUrl` debug seam pointing the
+#       home wiki at the CAPTCHA mock server.
+# ============================================================
+- runFlow:
+    file: shared/login-screen-signed-out.yaml
+    env:
+      MOCK_API_BASE_URL: "${MOCK_API_BASE_URL}"
+
+# ---- Start state: the Login screen, signed out, mock backend armed --------------------
+- assertVisible:
+    id: "login_button"
+    label: "Start screen: Login screen"
+- assertVisible:
+    id: "login_create_account_button"
+- assertNotVisible:
+    id: "captcha_image"
+    label: "No CAPTCHA challenge yet"
+- assertNotVisible:
+    id: "captcha_text"
+- takeScreenshot: "tc-3-set${SET_INDEX}-start"
+
+# ============================================================
+# W0: Submit valid credentials to reach the CAPTCHA challenge
+# ============================================================
+- takeScreenshot: "tc-3-set${SET_INDEX}-when0-before"
+- runFlow:
+    file: shared/login-captcha-challenge.yaml
+    env:
+      USERNAME: "${USERNAME}"
+      PASSWORD: "${PASSWORD}"
+- takeScreenshot: "tc-3-set${SET_INDEX}-when0-after"
+
+# The original challenge is on screen. Record what the mock has served so far, so that
+# "a *different* image" and "*exactly one* replacement" below are measured against a known
+# baseline rather than against whatever the server happened to accumulate.
+- runScript:
+    file: scripts/read-captcha-mock-stats.js
+    env:
+      MOCK_STATS_URL: "${MOCK_STATS_URL}"
+- assertTrue:
+    condition: ${output.captchaImageRequests == 1}
+    label: "Baseline: exactly one CAPTCHA image (the original) has been fetched"
+- assertTrue:
+    condition: ${output.captchaReloadRequests == 0}
+    label: "Baseline: no replacement has been requested yet"
+- assertTrue:
+    condition: ${output.firstImageId == 'mock-captcha-4242'}
+    label: "Baseline: the original challenge is the one the login prompt advertised"
+# Snapshot the original challenge's identity as plain scalars - `output` is rewritten by
+# the second read below, so these must be copied by value, not by reference.
+- evalScript: ${output.originalImageId = output.firstImageId}
+- evalScript: ${output.originalImageSha = output.firstImageSha}
+- evalScript: ${output.originalImageWord = output.firstImageWord}
+
+# ============================================================
+# W1: Tap the control that requests a new CAPTCHA image
+#     (the CAPTCHA image itself - CaptchaHandler.requestNewCaptcha)
+# ============================================================
+- takeScreenshot: "tc-3-set${SET_INDEX}-when1-before"
+- tapOn:
+    id: "captcha_image"
+    label: "W1: Tap the CAPTCHA image to request a new one"
+# requestNewCaptcha() shows the progress bar, calls action=fancycaptchareload and reloads
+# the ImageView from the new challenge's URL. Waiting for the spinner to disappear is
+# waiting for that round trip to finish.
+- extendedWaitUntil:
+    notVisible:
+      id: "captcha_image_progress"
+    timeout: 30000
+    label: "The replacement challenge has finished loading"
+- waitForAnimationToEnd
+- takeScreenshot: "tc-3-set${SET_INDEX}-when1-after"
+
+# ---- T0: a different CAPTCHA image replaces the original ------------------------------
+# What the mock was asked for. This is the authoritative record of which image bytes the
+# app is now displaying.
+- runScript:
+    file: scripts/read-captcha-mock-stats.js
+    env:
+      MOCK_STATS_URL: "${MOCK_STATS_URL}"
+- assertTrue:
+    condition: ${output.lastImageIsReplacement == true}
+    label: "T0: the most recently fetched image is a replacement challenge, not the original"
+- assertTrue:
+    condition: ${output.lastImageId != output.originalImageId}
+    label: "T0: it carries a different captchaId than the original challenge"
+- assertTrue:
+    condition: ${output.lastImageSha != output.originalImageSha}
+    label: "T0: and different image bytes (SHA-256 of the served PNG differs)"
+- assertTrue:
+    condition: ${output.lastImageWord != output.originalImageWord}
+    label: "T0: the replacement image spells a different word, so the user sees a new challenge"
+
+# ...and the replacement is what the screen is showing: the widget is still up, the image
+# is displayed rather than stuck behind its progress bar, and the login was not abandoned.
+- assertVisible:
+    id: "captcha_image"
+    label: "T0: a CAPTCHA image is still displayed"
+- assertNotVisible:
+    id: "captcha_image_progress"
+    label: "T0: the reload finished (no spinner left over)"
+- assertVisible:
+    id: "captcha_text"
+    label: "T0: the answer field is still offered for the new challenge"
+- assertVisible:
+    text: "To help protect against automated spam, please enter the words that appear below"
+    label: "T0: still being asked to answer a CAPTCHA"
+- assertVisible:
+    id: "login_button"
+    label: "T0: still on the Login screen - the challenge was replaced, not dismissed"
+
+# ---- T1: exactly one replacement image was requested from the mocked server -----------
+- assertTrue:
+    condition: ${output.captchaReloadRequests == 1}
+    label: "T1: action=fancycaptchareload was called exactly once"
+- assertTrue:
+    condition: ${output.replacementImageRequests == 1}
+    label: "T1: exactly one replacement CAPTCHA image was fetched"
+- assertTrue:
+    condition: ${output.captchaImageRequests == 2}
+    label: "T1: two CAPTCHA images in total - the original plus its single replacement"

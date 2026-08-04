@@ -1,0 +1,48 @@
+# shared-flow: image CAPTCHA challenge displayed on the Login screen, credentials already submitted
+# env: USERNAME (required), PASSWORD (required)
+# assumes: already sitting on the Login screen and signed out (e.g. straight after shared/login-screen-signed-out.yaml), with the login API mocked to demand an image CAPTCHA - .maestro/mock/captcha_login_server.py behind the `apiBaseUrl` debug seam
+# origin: test-case-3-android
+appId: org.wikipedia.dev
+name: "shared: CAPTCHA challenge on the Login screen"
+# NOTE: deliberately no `env:` defaults block here. Maestro applies a subflow's header env
+# *after* the env passed by `runFlow`, so a default would silently overwrite the caller's
+# value.
+---
+# Fill in the credentials. They are valid as far as the mock is concerned - the first
+# submit is refused purely because no CAPTCHA answer accompanies it.
+- tapOn:
+    id: "login_username_text"
+    label: "Focus the username field"
+- inputText: "${USERNAME}"
+- tapOn:
+    id: "login_password_input"
+    label: "Focus the password field"
+- inputText: "${PASSWORD}"
+- hideKeyboard
+- waitForAnimationToEnd
+# The Log in button only enables once both fields are filled, so this doubles as a check
+# that the credentials really landed in the fields.
+- assertVisible:
+    id: "login_button"
+    enabled: true
+    label: "Credentials entered"
+
+- tapOn:
+    id: "login_button"
+    label: "Submit the login form"
+
+# The app posts the credentials, gets FAIL, asks authmanagerinfo, learns that a captchaId
+# is required and reveals the image-captcha widget (group_captcha.xml, hidden until now).
+- extendedWaitUntil:
+    visible:
+      id: "captcha_image"
+    timeout: 30000
+    label: "Image CAPTCHA challenge appears"
+- waitForAnimationToEnd
+- assertVisible:
+    id: "captcha_text"
+    label: "CAPTCHA answer field is shown"
+# The reload affordance: tapping the image itself asks for a different challenge.
+- assertVisible:
+    text: "Tap CAPTCHA to reload"
+    label: "The reload hint is shown"
