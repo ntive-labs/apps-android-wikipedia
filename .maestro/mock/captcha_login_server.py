@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Mock MediaWiki backend for Maestro test case 2 (login with a CAPTCHA challenge).
+"""Mock MediaWiki backend for the Maestro login-CAPTCHA test cases (2 and 3).
 
 The Wikipedia app is pointed at this server with the debug-only launch-argument seam
 (`apiBaseUrl`, see org.wikipedia.settings.AppConfig), which redirects the *home wiki*'s
@@ -23,18 +23,39 @@ performs when a login requires an image CAPTCHA:
   6. GET  /w/api.php?action=query&meta=userinfo...
          -> the signed-in user's info, which completes the login
 
+Tapping the CAPTCHA image asks for a replacement challenge (CaptchaHandler.requestNewCaptcha),
+which adds two more exchanges — these are what test case 3 exercises:
+
+  7. GET  /w/api.php?action=fancycaptchareload
+         -> a *new* captcha index, exactly as MediaWiki's FancyCaptcha does. Each reload
+            mints a fresh id (`mock-captcha-reload-N`), so the app ends up pointing at a
+            different image URL than the one it was showing.
+  8. GET  /w/index.php?title=Special:Captcha/image&wpCaptchaId=<new id>
+         -> a *different* PNG: replacement ids render `--reload-answer` (and use a
+            different noise seed), so the served bytes differ from the original image.
+
+The word a replacement challenge expects is remembered, so a later clientlogin carrying
+that id only passes when it is answered with the word drawn into *that* image.
+
+`GET /mock/stats` reports what the server has been asked for since the current login
+attempt started — the reload count and one entry per CAPTCHA image served (id + SHA-256
+of the exact bytes) — which is how a flow proves that a replacement image was fetched,
+that it really differs from the original, and that it was requested exactly once.
+
 Everything else answers with a benign, empty-but-valid MediaWiki response so that the
 rest of the app (Explore feed, announcements, site info, ...) fails softly instead of
 throwing while the test drives the login screen.
 
 Usage:
     python3 .maestro/mock/captcha_login_server.py [--port 8080] [--answer AMBERTIDE]
+                                                  [--reload-answer ZEBRAWIND]
 
 No third-party dependencies: it uses only the Python standard library, and the CAPTCHA
 PNG is rendered from a built-in 5x7 bitmap font.
 """
 
 import argparse
+import hashlib
 import json
 import math
 import random
@@ -48,7 +69,13 @@ from urllib.parse import parse_qs, urlparse
 
 DEFAULT_PORT = 8080
 DEFAULT_ANSWER = "AMBERTIDE"
+DEFAULT_RELOAD_ANSWER = "ZEBRAWIND"
 CAPTCHA_ID = "mock-captcha-4242"
+RELOAD_CAPTCHA_ID_PREFIX = "mock-captcha-reload-"
+
+# Noise/wobble seed for the very first challenge. Replacement challenges derive their own
+# seed from their id, so two images never come out byte-identical even by accident.
+ORIGINAL_CAPTCHA_SEED = 1234
 
 # The user name the mock reports back on a successful login. Overridden per-run by the
 # username the flow actually types (the app stores whatever `clientlogin.username` says).
@@ -288,17 +315,53 @@ def site_info_response():
 # --------------------------------------------------------------------------------------
 
 class MockState:
-    def __init__(self, answer):
+    def __init__(self, answer, reload_answer=DEFAULT_RELOAD_ANSWER):
         self.answer = answer.upper()
+        self.reload_answer = reload_answer.upper()
         self.lock = threading.Lock()
         self.captcha_offered = False
         self.logged_in_user = None
         self.login_attempts = 0
+        # Everything below is per-login-attempt bookkeeping for test case 3.
+        self.reload_requests = 0
+        self.image_requests = []
+        # captcha id -> the word drawn into that challenge's image.
+        self.captcha_words = {CAPTCHA_ID: self.answer}
 
     def reset(self):
         self.captcha_offered = False
         self.logged_in_user = None
         self.login_attempts = 0
+        self.reload_requests = 0
+        self.image_requests = []
+        self.captcha_words = {CAPTCHA_ID: self.answer}
+
+    def new_reload_captcha(self):
+        """Mint the id of a replacement challenge, like FancyCaptcha handing out a new index."""
+        self.reload_requests += 1
+        captcha_id = "%s%d" % (RELOAD_CAPTCHA_ID_PREFIX, self.reload_requests)
+        self.captcha_words[captcha_id] = self.reload_answer
+        return captcha_id
+
+    def word_for(self, captcha_id):
+        return self.captcha_words.get(captcha_id)
+
+    def stats(self):
+        return {
+            "login_attempts": self.login_attempts,
+            "captcha_offered": self.captcha_offered,
+            "logged_in_user": self.logged_in_user,
+            "original_captcha_id": CAPTCHA_ID,
+            # How many times action=fancycaptchareload was called, i.e. how many replacement
+            # challenges the app asked for.
+            "captcha_reload_requests": self.reload_requests,
+            "reload_captcha_ids": [
+                cid for cid in self.captcha_words if cid.startswith(RELOAD_CAPTCHA_ID_PREFIX)
+            ],
+            # One entry per Special:Captcha/image GET, in the order they arrived.
+            "captcha_image_requests": list(self.image_requests),
+            "captcha_image_request_count": len(self.image_requests),
+        }
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -329,14 +392,19 @@ class Handler(BaseHTTPRequestHandler):
         path = parsed.path
 
         if path == "/w/index.php" and "Special:Captcha/image" in query.get("title", [""])[0]:
-            png = render_captcha_png(self.state.answer)
-            self._send(png, "image/png")
+            self._handle_captcha_image(query.get("wpCaptchaId", [""])[0])
             return
 
         if path == "/mock/reset":
             with self.state.lock:
                 self.state.reset()
             self._send_json({"mock": "reset"})
+            return
+
+        if path == "/mock/stats":
+            with self.state.lock:
+                payload = self.state.stats()
+            self._send_json(payload)
             return
 
         if path == "/w/api.php":
@@ -366,6 +434,37 @@ class Handler(BaseHTTPRequestHandler):
             return
 
         self._send_json({"mock": "unhandled", "path": parsed.path}, status=404)
+
+    # ---- CAPTCHA image -----------------------------------------------------------
+
+    def _handle_captcha_image(self, captcha_id):
+        """Serve the PNG for `captcha_id` and remember exactly what was handed out.
+
+        Each challenge renders its own word, so the replacement image the app fetches after
+        a reload genuinely differs from the original one - byte for byte and to the eye.
+        """
+        is_reload = captcha_id.startswith(RELOAD_CAPTCHA_ID_PREFIX)
+        with self.state.lock:
+            # An unrecognised id falls back to the original challenge, so a stray request is
+            # never mistaken for a replacement.
+            word = self.state.word_for(captcha_id) or self.state.answer
+            seed = zlib.crc32(captcha_id.encode()) if is_reload else ORIGINAL_CAPTCHA_SEED
+
+        png = render_captcha_png(word, seed=seed)
+        digest = hashlib.sha256(png).hexdigest()
+
+        with self.state.lock:
+            self.state.image_requests.append({
+                "captchaId": captcha_id,
+                "word": word,
+                "sha256": digest,
+                "bytes": len(png),
+                "isReload": is_reload,
+            })
+            ordinal = len(self.state.image_requests)
+
+        self.log_message("captcha image #%d: id=%s word=%s sha256=%s", ordinal, captcha_id, word, digest[:12])
+        self._send(png, "image/png")
 
     # ---- Action API --------------------------------------------------------------
 
@@ -397,7 +496,14 @@ class Handler(BaseHTTPRequestHandler):
             return
 
         if action == "fancycaptchareload":
-            self._send_json({"fancycaptchareload": {"index": CAPTCHA_ID}})
+            # CaptchaHandler.requestNewCaptcha() lands here when the user taps the image.
+            # Hand out a brand new index, like FancyCaptcha does - returning the same id
+            # would leave the app showing the very same challenge.
+            with self.state.lock:
+                captcha_id = self.state.new_reload_captcha()
+                count = self.state.reload_requests
+            self.log_message("fancycaptchareload #%d -> new captcha id %s", count, captcha_id)
+            self._send_json({"fancycaptchareload": {"index": captcha_id}})
             return
 
         if action == "parse":
@@ -427,9 +533,11 @@ class Handler(BaseHTTPRequestHandler):
                 # the app then discovers the CAPTCHA requirement through authmanagerinfo.
                 self.log_message("clientlogin #%d: no captcha supplied -> FAIL", attempt)
                 payload = clientlogin_fail()
-            elif captcha_id == CAPTCHA_ID and captcha_word.strip().upper() == self.state.answer:
+            elif captcha_word.strip().upper() == self.state.word_for(captcha_id):
+                # Answered with the word drawn into *that* challenge's image - which after a
+                # reload is the replacement word, not the original one.
                 self.state.logged_in_user = user_name or "MockUser"
-                self.log_message("clientlogin #%d: captcha accepted -> PASS for %s", attempt, self.state.logged_in_user)
+                self.log_message("clientlogin #%d: captcha %s accepted -> PASS for %s", attempt, captcha_id, self.state.logged_in_user)
                 payload = clientlogin_pass(self.state.logged_in_user)
             else:
                 self.log_message("clientlogin #%d: wrong captcha %r -> FAIL", attempt, captcha_word)
@@ -443,16 +551,23 @@ def main():
     parser.add_argument("--port", type=int, default=DEFAULT_PORT)
     parser.add_argument("--host", default="0.0.0.0")
     parser.add_argument("--answer", default=DEFAULT_ANSWER, help="the CAPTCHA answer the flow will type")
+    parser.add_argument("--reload-answer", default=DEFAULT_RELOAD_ANSWER,
+                        help="the answer drawn into replacement CAPTCHA images (after a reload)")
     args = parser.parse_args()
 
-    if not re.fullmatch(r"[A-Za-z0-9]+", args.answer):
-        parser.error("--answer must be alphanumeric (the built-in font only covers A-Z and 0-9)")
+    for name, value in (("--answer", args.answer), ("--reload-answer", args.reload_answer)):
+        if not re.fullmatch(r"[A-Za-z0-9]+", value):
+            parser.error("%s must be alphanumeric (the built-in font only covers A-Z and 0-9)" % name)
 
-    Handler.state = MockState(args.answer)
+    if args.answer.upper() == args.reload_answer.upper():
+        parser.error("--reload-answer must differ from --answer, otherwise a replacement "
+                     "CAPTCHA would be indistinguishable from the original one")
+
+    Handler.state = MockState(args.answer, args.reload_answer)
     server = ThreadingHTTPServer((args.host, args.port), Handler)
     sys.stderr.write(
-        "[mock] MediaWiki captcha-login mock listening on http://%s:%d (captcha answer: %s)\n"
-        % (args.host, args.port, Handler.state.answer)
+        "[mock] MediaWiki captcha-login mock listening on http://%s:%d (captcha answer: %s, after reload: %s)\n"
+        % (args.host, args.port, Handler.state.answer, Handler.state.reload_answer)
     )
     sys.stderr.flush()
     try:
