@@ -1,0 +1,17 @@
+appId: org.wikipedia.dev
+name: "TC2 set 0 - Login completes after answering a CAPTCHA challenge (maestro-user)"
+# Parameter set 0 of test case 2:
+#   username = maestro-user
+#   password = correct-horse-battery
+#
+# Requires .maestro/mock/captcha_login_server.py to be running on the host with the same
+# --answer value as CAPTCHA_ANSWER below (see .maestro/run-tc-2.sh).
+---
+- runFlow:
+    file: tc-2-login-with-captcha.yaml
+    env:
+      SET_INDEX: "0"
+      USERNAME: "maestro-user"
+      PASSWORD: "correct-horse-battery"
+      CAPTCHA_ANSWER: "AMBERTIDE"
+      MOCK_API_BASE_URL: "http://10.0.2.2:8080"

@@ -1,0 +1,147 @@
+# shared-flow: signed-out app parked on the Login screen (first-run onboarding completed)
+# env: MOCK_API_BASE_URL (required, pass "" to talk to production; when non-empty the app's home wiki is redirected to that host through the debug AppConfig launch seam)
+# assumes: debug build org.wikipedia.dev (the apiBaseUrl seam is hard-gated to BuildConfig.DEBUG); this flow wipes app state and signs out any leftover AccountManager session, so the user always ends up signed out
+# origin: test-case-2-android
+appId: org.wikipedia.dev
+name: "shared: signed-out Login screen"
+# NOTE: deliberately no `env:` defaults block here. Maestro applies a subflow's header env
+# *after* the env passed by `runFlow`, so a default would silently overwrite the caller's
+# value. Callers must pass MOCK_API_BASE_URL explicitly (an empty string is fine).
+---
+# clearState wipes app data, so first-run onboarding is replayed from scratch. (Any signed-in
+# session is dealt with further down - see the AccountManager note.)
+# `apiBaseUrl` is the debug-only mock seam (org.wikipedia.settings.AppConfig), applied at
+# the top of MainActivity.onCreate before any network call is made. An empty value is
+# ignored by AppConfig, so callers that need no mocking can pass an empty string.
+- launchApp:
+    clearState: true
+    permissions:
+      all: allow
+    arguments:
+      apiBaseUrl: "${MOCK_API_BASE_URL}"
+      disableCertPinning: true
+
+# First-run onboarding pager (INTRO -> DATA & PRIVACY -> LANGUAGES).
+# The forward arrow (content description "Forward") advances each page; the third tap
+# finishes onboarding.
+- extendedWaitUntil:
+    visible:
+      text: "Forward"
+    timeout: 40000
+    optional: true
+# Resilience guard: on a loaded machine the emulator sometimes ANR-kills the app during the
+# cold start that follows `pm clear` ("failed to complete startup"). Relaunching without
+# clearing state again re-applies the launch overrides and resumes onboarding.
+- runFlow:
+    when:
+      notVisible:
+        text: "Forward"
+    commands:
+      - launchApp:
+          clearState: false
+          arguments:
+            apiBaseUrl: "${MOCK_API_BASE_URL}"
+            disableCertPinning: true
+          label: "Cold start was killed - relaunch"
+- extendedWaitUntil:
+    visible:
+      text: "Forward"
+    timeout: 60000
+    label: "First-run onboarding is shown"
+- repeat:
+    times: 3
+    commands:
+      - tapOn:
+          text: "Forward"
+          label: "Advance first-run onboarding"
+      - waitForAnimationToEnd
+
+# Second onboarding ("Follow your curiosity") -> skip topic selection.
+- extendedWaitUntil:
+    visible: "Skip"
+    timeout: 30000
+- tapOn:
+    text: "Skip"
+    label: "Skip topic onboarding"
+- waitForAnimationToEnd
+
+# Home screen -> open the "More" menu.
+- extendedWaitUntil:
+    visible:
+      id: "nav_tab_more"
+    timeout: 30000
+- tapOn:
+    id: "nav_tab_more"
+    label: "Open More menu"
+- waitForAnimationToEnd
+
+# `clearState` wipes the app's own data, but the Wikipedia account lives in Android's
+# AccountManager (account type org.wikimedia.dev) and survives `pm clear`. So if an earlier
+# run left a session behind, sign it out through Settings before continuing - otherwise the
+# "signed out" precondition would silently not hold.
+- runFlow:
+    when:
+      notVisible:
+        id: "main_drawer_login_button"
+    commands:
+      - tapOn:
+          id: "main_drawer_settings_container"
+          label: "Leftover session: open Settings to sign out"
+      - waitForAnimationToEnd
+      # The account section (and its Log out button) is the last block of Settings.
+      - scrollUntilVisible:
+          element:
+            id: "logoutButton"
+          direction: DOWN
+          timeout: 30000
+      - tapOn:
+          id: "logoutButton"
+      - extendedWaitUntil:
+          visible:
+            id: "android:id/button1"
+          timeout: 15000
+      - tapOn:
+          id: "android:id/button1"
+          label: "Confirm log out"
+      - extendedWaitUntil:
+          visible:
+            id: "nav_tab_more"
+          timeout: 30000
+      - waitForAnimationToEnd
+      - tapOn:
+          id: "nav_tab_more"
+          label: "Re-open More menu"
+      - waitForAnimationToEnd
+
+# The account row offers "Log in / join Wikipedia", which is only shown when no user is
+# signed in - this doubles as the signed-out precondition check.
+- extendedWaitUntil:
+    visible:
+      id: "main_drawer_login_button"
+    timeout: 20000
+    label: "Signed out (Log in is offered)"
+- tapOn:
+    id: "main_drawer_account_container"
+    label: "Tap Log in"
+- waitForAnimationToEnd
+
+# LoginActivity always shows account creation first (CREATE_ACCOUNT_FIRST defaults to
+# true), so follow its "Log in" link to reach the Login screen itself.
+- extendedWaitUntil:
+    visible:
+      id: "create_account_login_button"
+    timeout: 30000
+- tapOn:
+    id: "create_account_login_button"
+    label: "Go to the Login screen"
+- waitForAnimationToEnd
+
+- extendedWaitUntil:
+    visible:
+      id: "login_button"
+    timeout: 30000
+    label: "Login screen is shown"
+- assertVisible:
+    id: "login_username_text"
+- assertVisible:
+    id: "login_password_input"
