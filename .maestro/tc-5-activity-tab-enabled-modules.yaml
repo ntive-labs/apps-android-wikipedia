@@ -1,0 +1,298 @@
+appId: org.wikipedia.dev
+name: "TC5 - Enabled Activity tab modules are shown"
+tags:
+  - android
+  - activity-tab
+  - customization
+---
+# =============================================================================
+# Test case 5: Enabled Activity tab modules are shown
+# User story: "Show enabled Activity Tab Modules"
+#
+# GIVEN
+#   G0  The user is signed in
+#   G1  Activity data is mocked so a stored donation exists and edit and reading
+#       activity is present
+# WHEN
+#   W0  Open the Activity tab
+# THEN
+#   T0  The Donation History module is visible
+#   T1  Modules disabled in customization are not rendered
+#
+# Start screen: the Activity tab (ActivityTabFragment), signed in, with the module
+# customization this case is about already applied.
+#
+# The case is not parameterized, so every screenshot carries set index 0.
+#
+# HOW THE GIVENS ARE SATISFIED
+#   G0  shared/activity-tab-signed-in.yaml signs the user in against the mock MediaWiki
+#       backend (mock/activity_tab_server.py), which answers action=clientlogin with PASS.
+#   G1  splits over two seams, because the Activity tab reads its data from two places:
+#         * edit activity  - HTTP. The mock backend serves action=query&list=usercontribs
+#           (the Timeline) and the GrowthExperiments user-impact payload (All time impact /
+#           Editing insights), reached through the debug `apiBaseUrl` launch override.
+#         * stored donation + reading activity - LOCAL. Neither is ever fetched over the
+#           network: the donation lives in Prefs.donationResults (SharedPreferences) and the
+#           reading history in the Room database. The debug-only `seedActivityData` launch
+#           argument (org.wikipedia.settings.AppConfig) writes both, which is what the shared
+#           flow passes SEED_ACTIVITY_DATA=true for.
+#       Both halves are asserted below rather than assumed.
+#
+# WHICH MODULES ARE DISABLED FOR T1
+#   ActivityTabModules defaults every module to enabled except DONATIONS, and the
+#   customization screen only offers a Donations row once a stored donation exists. So this
+#   flow turns Donations ON (T0 needs it) and turns All time impact + Timeline of behavior
+#   OFF (T1 needs them). Both of the latter are proven to render first, so T1 cannot pass
+#   vacuously against a module that was never going to appear.
+#
+# REQUIRED ENV
+#   No `env:` block here on purpose: a flow's own env is applied *after* the env a caller
+#   passes with `runFlow`, so a default would silently shadow the caller's value. The
+#   tc-5-...-set0.yaml wrapper supplies everything.
+#
+#     SET_INDEX      parameter set index, used in screenshot names ("0")
+#     SHOT_PREFIX    screenshot filename prefix (the media-release naming convention)
+#     SHOTS          screenshot output directory, relative to the working directory
+#     USERNAME       username the mock backend accepts
+#     PASSWORD       password the mock backend accepts
+#     API_BASE_URL   the mock backend as seen from the device ("http://10.0.2.2:8080")
+#
+# HOW TO RUN
+#   .maestro/run-tc-5.sh          (starts the mock, builds/installs, runs the flow)
+# or manually:
+#   1. MOCK_USERNAME=maestro-user MOCK_PASSWORD=correct-horse-battery \
+#        python3 .maestro/mock/activity_tab_server.py &
+#   2. ./gradlew installDevDebug     # the launch seam is gated on BuildConfig.DEBUG
+#   3. maestro test .maestro/tc-5-activity-tab-enabled-modules.yaml
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# GIVEN G0 + the HTTP half of G1: signed in, on the Activity tab, mock backend serving the
+# edit activity; the local half of G1 (donation + reading history) seeded on launch.
+# -----------------------------------------------------------------------------
+- runFlow:
+    file: shared/activity-tab-signed-in.yaml
+    label: "GIVEN G0: sign in and reach the Activity tab (mock backend + seeded local activity data)"
+    env:
+      MOCK_API_BASE_URL: "${API_BASE_URL}"
+      USERNAME: "${USERNAME}"
+      PASSWORD: "${PASSWORD}"
+      SEED_ACTIVITY_DATA: "true"
+
+# G1, reading activity: the seeded history produces a non-zero weekly time spent and a
+# non-zero "articles read this month", both rendered by the reading-history module.
+- assertVisible:
+    id: "activity_tab_module_reading_insights"
+    label: "GIVEN G1 verified: reading activity is present (Articles read this month card)"
+- assertVisible:
+    text: "Time spent reading this week"
+    label: "GIVEN G1 verified: the weekly time-spent readout is rendered"
+
+# G1, edit activity: All time impact and the Timeline are both built from the mock backend's
+# usercontribs / user-impact responses. Reaching them with scrollUntilVisible also establishes
+# the baseline T1 depends on - these two modules DO render while they are enabled.
+- scrollUntilVisible:
+    element:
+      id: "activity_tab_module_impact"
+    direction: DOWN
+    timeout: 40000
+    centerElement: true
+    label: "GIVEN G1 verified + T1 baseline: the All time impact module renders while enabled"
+- assertVisible:
+    id: "activity_tab_module_impact"
+- scrollUntilVisible:
+    element:
+      id: "activity_tab_module_timeline"
+    direction: DOWN
+    timeout: 40000
+    centerElement: true
+    label: "GIVEN G1 verified + T1 baseline: the Timeline module renders while enabled"
+- assertVisible:
+    id: "activity_tab_module_timeline"
+- scrollUntilVisible:
+    element: "${USERNAME}.s reading"
+    direction: UP
+    timeout: 30000
+    label: "Back to the top of the Activity tab"
+
+# -----------------------------------------------------------------------------
+# Apply the customization this case is about.
+#
+# The overflow submenu rows carry no per-item id, so the first row (Customize) is addressed by
+# the menu row title id plus its index.
+# -----------------------------------------------------------------------------
+- tapOn:
+    id: "org.wikipedia.dev:id/empty"
+    label: "Open the Activity tab overflow menu"
+- waitForAnimationToEnd:
+    timeout: 3000
+- tapOn:
+    id: "org.wikipedia.dev:id/title"
+    index: 0
+    label: "Open Customize (first overflow menu entry)"
+- extendedWaitUntil:
+    visible:
+      id: "activity_tab_customize_switch_donations"
+    timeout: 20000
+    label: "Activity tab customization screen is shown"
+- waitForAnimationToEnd:
+    timeout: 2000
+
+# G1, stored donation: the customization screen renders a Donations row *only* when
+# Prefs.donationResults is non-empty, so the row existing at all is the proof that a stored
+# donation exists. It starts off, because ActivityTabModules defaults isDonationsEnabled=false.
+- assertVisible:
+    id: "activity_tab_customize_switch_donations"
+    checked: false
+    label: "GIVEN G1 verified: a stored donation exists (the Donations row is offered, and is off)"
+- tapOn:
+    id: "activity_tab_customize_switch_donations"
+    label: "Enable the Donations module (\"Last in app donation\")"
+- waitForAnimationToEnd:
+    timeout: 2000
+- assertVisible:
+    id: "activity_tab_customize_switch_donations"
+    checked: true
+
+- tapOn:
+    id: "activity_tab_customize_switch_impact"
+    label: "Disable the All time impact module"
+- waitForAnimationToEnd:
+    timeout: 2000
+- tapOn:
+    id: "activity_tab_customize_switch_timeline"
+    label: "Disable the Timeline of behavior module"
+- waitForAnimationToEnd:
+    timeout: 2000
+
+- assertVisible:
+    id: "activity_tab_customize_switch_impact"
+    checked: false
+    label: "All time impact is now disabled in customization"
+- assertVisible:
+    id: "activity_tab_customize_switch_timeline"
+    checked: false
+    label: "Timeline of behavior is now disabled in customization"
+- assertVisible:
+    id: "activity_tab_customize_switch_reading_insights"
+    checked: true
+    label: "Reading insights stays enabled (the control for T1)"
+- assertVisible:
+    id: "activity_tab_customize_switch_editing_insights"
+    checked: true
+    label: "Editing insights stays enabled"
+
+- back
+- extendedWaitUntil:
+    visible: "${USERNAME}.s reading"
+    timeout: 30000
+    label: "Back on the Activity tab - start screen reached, every Given holds"
+- waitForAnimationToEnd:
+    timeout: 4000
+
+# START STATE - signed in, activity data mocked and seeded, customization applied.
+- takeScreenshot:
+    path: "${SHOTS}/${SHOT_PREFIX}-set${SET_INDEX}-start"
+
+# =============================================================================
+# WHEN W0 - Open the Activity tab.
+#
+# Step away first so that "open the Activity tab" is a real navigation with an observable
+# before/after, and so the tab is entered fresh - which is what makes the assertions below a
+# check of what the Activity tab *renders on open*, rather than of a screen that happened to
+# still be on display. This hop is positioning, not part of the case.
+#
+# Saved (reading lists) is the tab to step away to: it is served entirely from the local
+# database, so it renders normally under the mock backend, whereas Explore would sit on a
+# connection error (the mock has no per-language host for the feed).
+# =============================================================================
+- tapOn:
+    id: "org.wikipedia.dev:id/nav_tab_reading_lists"
+    label: "Position for W0: leave the Activity tab"
+- extendedWaitUntil:
+    notVisible: "${USERNAME}.s reading"
+    timeout: 20000
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot:
+    path: "${SHOTS}/${SHOT_PREFIX}-set${SET_INDEX}-when0-before"
+
+- tapOn:
+    id: "org.wikipedia.dev:id/nav_tab_edits"
+    label: "WHEN W0: open the Activity tab"
+- extendedWaitUntil:
+    visible: "${USERNAME}.s reading"
+    timeout: 30000
+    label: "WHEN W0: the Activity tab is open"
+- waitForAnimationToEnd:
+    timeout: 6000
+- takeScreenshot:
+    path: "${SHOTS}/${SHOT_PREFIX}-set${SET_INDEX}-when0-after"
+
+# =============================================================================
+# THEN T0 - The Donation History module is visible.
+#
+# The module is the DonationModule card, gated on
+# isModuleVisible(DONATIONS, haveAtLeastOneDonation) - i.e. on the module being enabled AND
+# Prefs.donationResults being non-empty. It shows the stored donation as a relative time.
+# =============================================================================
+- scrollUntilVisible:
+    element:
+      id: "activity_tab_module_donations"
+    direction: DOWN
+    timeout: 40000
+    centerElement: true
+    label: "THEN T0: the Donation History module is on the Activity tab"
+- assertVisible:
+    id: "activity_tab_module_donations"
+    label: "THEN T0: the Donation History module is visible"
+- assertVisible:
+    text: "Last donation in app"
+    label: "THEN T0: it is the donation card, headed \"Last donation in app\""
+- assertVisible:
+    text: ".*days ago.*"
+    label: "THEN T0: it shows the stored donation as a relative time"
+- takeScreenshot:
+    path: "${SHOTS}/${SHOT_PREFIX}-set${SET_INDEX}-then0-donation-module"
+
+# =============================================================================
+# THEN T1 - Modules disabled in customization are not rendered.
+#
+# Walk the whole tab from top to bottom, asserting after every scroll step that neither
+# disabled module's content is on screen. A single assertion would pass vacuously for a
+# module that lives below the fold, which is why this sweeps the entire scroll range - the
+# same range the baseline scrollUntilVisible above proved both modules were reachable in.
+# =============================================================================
+- scrollUntilVisible:
+    element: "${USERNAME}.s reading"
+    direction: UP
+    timeout: 30000
+    label: "THEN T1: back to the top of the Activity tab"
+- waitForAnimationToEnd:
+    timeout: 2000
+
+# The control: modules left enabled are still rendered, so the sweep below is measuring
+# customization and not an Activity tab that simply failed to load.
+- assertVisible:
+    id: "activity_tab_module_reading_insights"
+    label: "THEN T1 control: an enabled module (Reading insights) IS rendered"
+
+- repeat:
+    times: 8
+    label: "THEN T1: sweep the Activity tab - neither disabled module may appear"
+    commands:
+      - assertNotVisible:
+          id: "activity_tab_module_impact"
+      - assertNotVisible:
+          id: "activity_tab_module_timeline"
+      - scroll
+      - waitForAnimationToEnd:
+          timeout: 1500
+- assertNotVisible:
+    id: "activity_tab_module_impact"
+    label: "THEN T1: the disabled All time impact module is not rendered at the bottom either"
+- assertNotVisible:
+    id: "activity_tab_module_timeline"
+    label: "THEN T1: the disabled Timeline module is not rendered at the bottom either"
+- takeScreenshot:
+    path: "${SHOTS}/${SHOT_PREFIX}-set${SET_INDEX}-then1-bottom-of-tab"

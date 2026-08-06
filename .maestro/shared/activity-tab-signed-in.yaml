@@ -1,0 +1,129 @@
+# shared-flow: signed-in user parked on the Activity tab, with its one-time onboarding dismissed
+# env: MOCK_API_BASE_URL (required, pass "" to talk to production), USERNAME (required), PASSWORD (required), SEED_ACTIVITY_DATA (required, "true" seeds a stored donation + reading history through the debug AppConfig seam, "false" seeds nothing)
+# assumes: debug build org.wikipedia.dev (the launch seam is hard-gated to BuildConfig.DEBUG); when MOCK_API_BASE_URL is non-empty, .maestro/mock/activity_tab_server.py is serving it and accepts USERNAME/PASSWORD
+# origin: test-case-5-android
+appId: org.wikipedia.dev
+name: "shared: signed-in Activity tab"
+# NOTE: deliberately no `env:` defaults block. Maestro applies a subflow's header env *after* the
+# env passed by `runFlow`, so a default here would silently overwrite the caller's value. Callers
+# must pass every variable above explicitly.
+---
+# `clearState` wipes app data (so first-run onboarding replays from scratch and module
+# customization is back at its defaults) and the launch arguments are read by the debug-only
+# org.wikipedia.settings.AppConfig at the top of MainActivity.onCreate, before any network call:
+#   apiBaseUrl       - points the home wiki's Action / REST v1 / core REST APIs at the mock
+#   seedActivityData - writes the *local* activity data no HTTP mock can produce: a stored
+#                      DonationResult in Prefs.donationResults plus reading-history rows
+- launchApp:
+    clearState: true
+    permissions:
+      # Pre-grant notifications: the app asks for POST_NOTIFICATIONS during onboarding and again
+      # right after a successful login, and that system dialog would otherwise cover the screen
+      # the caller is working on.
+      all: deny
+      notifications: allow
+    arguments:
+      apiBaseUrl: "${MOCK_API_BASE_URL}"
+      disableCertPinning: true
+      seedActivityData: "${SEED_ACTIVITY_DATA}"
+    label: "Launch a freshly-cleared app against the mock backend"
+- waitForAnimationToEnd:
+    timeout: 10000
+
+# A cleared app shows the intro pager (two variants: "Forward" arrows on first launch after
+# install, "Skip"/"Next" on the topic-personalisation pager). Android 13+ also raises the
+# notifications permission dialog part-way through. Dismiss all of them, best-effort.
+- repeat:
+    times: 12
+    label: "Dismiss first-run onboarding and any permission dialogs"
+    commands:
+      - tapOn:
+          text: "Don.t allow|Allow|While using the app|No thanks"
+          optional: true
+      - tapOn:
+          text: "Skip|Forward|Next|Get started"
+          optional: true
+      - waitForAnimationToEnd:
+          timeout: 2000
+- extendedWaitUntil:
+    visible:
+      id: "org.wikipedia.dev:id/nav_tab_edits"
+    timeout: 30000
+    label: "Onboarding dismissed, main screen reached"
+
+# The very first visit to the Activity tab pushes ActivityTabOnboardingActivity in front of it.
+- tapOn:
+    id: "org.wikipedia.dev:id/nav_tab_edits"
+- waitForAnimationToEnd:
+    timeout: 6000
+- runFlow:
+    when:
+      visible: "Introducing Activity"
+    label: "Dismiss the one-time Activity tab onboarding"
+    commands:
+      - tapOn: "Continue"
+      - waitForAnimationToEnd:
+          timeout: 8000
+
+# `clearState` wipes app data but NOT the AccountManager account, so a device that ran this flow
+# before is still signed in. Log in only when the logged-out call to action is actually showing;
+# either way being signed in is asserted at the end.
+#
+# The logged-out Activity tab's "Log in" opens LoginActivity directly (no CreateAccountActivity
+# in front of it). The mock answers action=clientlogin with status PASS.
+- runFlow:
+    when:
+      visible:
+        id: "activity_tab_logged_out"
+    label: "Sign in through the Activity tab's logged-out call to action"
+    commands:
+      - tapOn: "Log in"
+      - extendedWaitUntil:
+          visible:
+            id: "org.wikipedia.dev:id/login_button"
+          timeout: 20000
+      - tapOn:
+          id: "org.wikipedia.dev:id/login_username_text"
+      - inputText: "${USERNAME}"
+      - hideKeyboard
+      - tapOn:
+          id: "org.wikipedia.dev:id/login_password_input"
+      - inputText: "${PASSWORD}"
+      - hideKeyboard
+      - tapOn:
+          id: "org.wikipedia.dev:id/login_button"
+      - waitForAnimationToEnd:
+          timeout: 8000
+      # On a device where notifications were never granted the app re-asks right after login.
+      - tapOn:
+          text: "Don.t allow|Allow|While using the app|No thanks"
+          optional: true
+      - extendedWaitUntil:
+          visible:
+            id: "org.wikipedia.dev:id/nav_tab_edits"
+          timeout: 30000
+
+# Returning from the Activity tab onboarding leaves MainActivity's toolbar hidden (it is only
+# re-shown by onTabChanged), so bounce through Home once to bring the toolbar - and with it the
+# overflow menu that opens the customization screen - on screen.
+- tapOn:
+    id: "org.wikipedia.dev:id/nav_tab_home"
+- waitForAnimationToEnd:
+    timeout: 4000
+- tapOn:
+    id: "org.wikipedia.dev:id/nav_tab_edits"
+- extendedWaitUntil:
+    visible:
+      id: "org.wikipedia.dev:id/empty"
+    timeout: 20000
+    label: "Activity tab with its overflow menu is on screen"
+
+# Signed in: the Activity tab renders the signed-in dashboard rather than the logged-out call to
+# action, and it is headed by the signed-in user's name.
+- assertNotVisible:
+    id: "activity_tab_logged_out"
+    label: "The logged-out Activity tab state is gone"
+- extendedWaitUntil:
+    visible: "${USERNAME}.s reading"
+    timeout: 30000
+    label: "Signed in as ${USERNAME}, Activity tab loaded"

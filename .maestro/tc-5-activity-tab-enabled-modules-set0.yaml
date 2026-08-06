@@ -1,0 +1,21 @@
+appId: org.wikipedia.dev
+name: "TC5 set 0 - Enabled Activity tab modules are shown"
+tags:
+  - android
+  - activity-tab
+  - customization
+---
+# Test case 5 is not parameterized; this single wrapper supplies the environment the flow needs
+# and pins the parameter-set index used in the screenshot names to 0.
+#
+# SHOT_PREFIX follows the media-release naming convention for this test run's screenshots; it is
+# deliberately separate from the flow's own tc-5 file name.
+- runFlow:
+    file: tc-5-activity-tab-enabled-modules.yaml
+    env:
+      SET_INDEX: "0"
+      SHOT_PREFIX: "tc-15"
+      SHOTS: ".maestro/screenshots"
+      USERNAME: "maestro-user"
+      PASSWORD: "correct-horse-battery"
+      API_BASE_URL: "http://10.0.2.2:8080"

@@ -1,3 +1,6 @@
 # Python bytecode from the mock servers
 __pycache__/
 *.pyc
+
+# Screenshots written by takeScreenshot - test output, not source
+screenshots/

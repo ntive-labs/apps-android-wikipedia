@@ -33,6 +33,7 @@ import androidx.compose.ui.graphics.painter.BrushPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLocale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
@@ -152,7 +153,8 @@ fun ReadingHistoryModule(
         ArticleReadThisMonthCard(
             modifier = modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 16.dp),
+                .padding(horizontal = 16.dp, vertical = 16.dp)
+                .testTag(ModuleType.READING_INSIGHTS.moduleTestTag),
             readingHistory = readingHistory,
             todayDate = todayDate,
             onClick = {
